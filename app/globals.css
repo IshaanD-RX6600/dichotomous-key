@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    @apply bg-ink text-cream font-sans antialiased;
+    /* soft botanical light + a whisper of copper */
+    background-image:
+      radial-gradient(1100px 620px at 12% -8%, rgba(41, 82, 76, 0.55), transparent 60%),
+      radial-gradient(820px 460px at 100% 0%, rgba(198, 123, 71, 0.12), transparent 55%);
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display;
+  }
+
+  /* Bold every key term — copper on dark, copper-brown on parchment. */
+  b, strong {
+    font-weight: 600;
+  }
+  .on-dark b, .on-dark strong {
+    color: theme("colors.copper-soft");
+  }
+  .card-parchment b, .card-parchment strong {
+    color: theme("colors.copper-deep");
+  }
+
+  /* Visible keyboard focus everywhere. */
+  :focus-visible {
+    outline: 2px solid theme("colors.copper");
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  .card-parchment {
+    @apply rounded-lg;
+    background: linear-gradient(180deg, #f5eeda, #e6dbbf);
+    color: theme("colors.bodyink");
+    box-shadow:
+      0 12px 30px rgba(0, 0, 0, 0.4),
+      inset 0 0 0 1px rgba(120, 95, 55, 0.28);
+  }
+
+  /* Hairline botanical divider. */
+  .divider-botanical {
+    height: 1px;
+    border: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      theme("colors.copper") 18%,
+      #7d6a44 50%,
+      theme("colors.copper") 82%,
+      transparent
+    );
+    opacity: 0.5;
+  }
+
+  .eyebrow {
+    @apply text-copper text-xs font-semibold uppercase tracking-[0.22em];
+  }
+
+  .section-shell {
+    @apply mx-auto max-w-6xl px-5 md:px-8;
+  }
+}
+
+/* Thin, themed scrollbars for the tree canvas. */
+.tree-scroll::-webkit-scrollbar {
+  height: 12px;
+  width: 12px;
+}
+.tree-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+}
+.tree-scroll::-webkit-scrollbar-thumb {
+  background: rgba(198, 123, 71, 0.45);
+  border-radius: 999px;
+}
