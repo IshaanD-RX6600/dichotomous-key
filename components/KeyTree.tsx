@@ -15,6 +15,7 @@ const NODE_H = 46; // compact node box height
 const SLOT_W = 158; // horizontal distance between adjacent leaf columns
 const LEVEL_H = 98; // vertical distance between tree levels
 const PAD = 28; // padding around the diagram so nothing clips at the edges
+const MIN_SCALE = 0.4; // never shrink below this; smaller screens pan instead
 
 export default function KeyTree({
   nodes,
@@ -39,6 +40,7 @@ export default function KeyTree({
   // optional manual multiplier on top (1 = fully fitted, the default).
   const shellRef = useRef<HTMLDivElement>(null);
   const [fitScale, setFitScale] = useState(0.4);
+  const [fitsToScreen, setFitsToScreen] = useState(true);
   const [zoom, setZoom] = useState(1);
 
   /* Layout: each leaf gets its own column (x); each parent sits at the mean x
@@ -79,9 +81,13 @@ export default function KeyTree({
     if (!el) return;
     const compute = () => {
       const availW = el.clientWidth - 8;
-      if (availW <= 0) return; // hidden (e.g. mobile) — keep last value
-      const availH = Math.max(320, Math.min(window.innerHeight * 0.74, 780));
-      setFitScale(Math.min(1, availW / width, availH / height));
+      if (availW <= 0) return; // not laid out yet — keep last value
+      const availH = Math.max(300, Math.min(window.innerHeight * 0.8, 820));
+      const raw = Math.min(availW / width, availH / height); // scale to fully fit
+      // Never shrink below a legible minimum; on very small screens the tree
+      // becomes pannable at MIN_SCALE instead of an unreadable speck.
+      setFitScale(Math.min(1, Math.max(raw, MIN_SCALE)));
+      setFitsToScreen(raw >= MIN_SCALE);
     };
     compute();
     const ro = new ResizeObserver(compute);
@@ -95,6 +101,9 @@ export default function KeyTree({
 
   const scale = fitScale * zoom;
   const zoomedIn = zoom > 1.001;
+  // When the tree can't fully fit legibly (small screens) or the user zoomed
+  // in, make the canvas pannable instead of clipping it.
+  const panning = zoomedIn || !fitsToScreen;
 
   const pathTo = (id: string): string[] => {
     const parent: Record<string, string> = {};
@@ -183,7 +192,7 @@ export default function KeyTree({
           <button className={btnZoom} onClick={() => setZoom((z) => Math.min(3, +(z + 0.25).toFixed(2)))} disabled={zoom >= 3} aria-label="Zoom in" title="Zoom in">+</button>
         </div>
         <p className="text-sm text-cream-dim">
-          The whole tree fits the screen. <b className="text-copper-soft">Hover</b> or <b className="text-copper-soft">focus</b> any node to enlarge it and pick its <b className="text-copper-soft">a</b>/<b className="text-copper-soft">b</b> choice.
+          The tree scales to fit your screen. <b className="text-copper-soft">Hover</b> or <b className="text-copper-soft">tap</b> any node to enlarge it and pick its <b className="text-copper-soft">a</b>/<b className="text-copper-soft">b</b> choice.
         </p>
       </div>
 
@@ -221,15 +230,12 @@ export default function KeyTree({
         ))}
       </div>
 
-      {/* Full-bleed: break out of the text column and use the whole viewport
-          width so the fitted tree renders as large as possible. */}
-      <div className="mx-[calc(50%-50vw)] flex justify-center px-4 md:px-8">
-        <div
-          ref={shellRef}
-          className={`tree-scroll w-full max-w-[1800px] ${zoomedIn ? "overflow-auto" : "overflow-visible"}`}
-          style={zoomedIn ? { maxHeight: "80vh" } : undefined}
-        >
-          <div className="relative mx-auto" style={{ width: width * scale, height: height * scale }}>
+      <div
+        ref={shellRef}
+        className={`tree-scroll w-full ${panning ? "overflow-auto" : "overflow-visible"}`}
+        style={panning ? { maxHeight: "80vh" } : undefined}
+      >
+        <div className="relative mx-auto" style={{ width: width * scale, height: height * scale }}>
           <div
             className="absolute left-0 top-0"
             style={{ width, height, transform: `scale(${scale})`, transformOrigin: "top left" }}
@@ -377,10 +383,9 @@ export default function KeyTree({
             })}
           </div>
         </div>
-        </div>
       </div>
       <p className="mt-3 text-center text-xs text-cream-dim">
-        The entire top-to-bottom tree is shown at once. Use <b>+ / −</b> to zoom in for a closer look, or <b>Fit</b> to reset. On a phone, use the step-through version below.
+        Scaled to fit your screen top-to-bottom. Use <b>+ / −</b> to zoom, <b>Fit</b> to reset, and drag to pan when zoomed in. On a small screen you can also use the step-through below.
       </p>
     </div>
   );
