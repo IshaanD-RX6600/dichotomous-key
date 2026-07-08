@@ -29,11 +29,19 @@ export const hasDb = !!(
   process.env.POSTGRES_URL_NON_POOLING
 );
 
-// Seed images act as a default: if a stored organism has no image, fall back to
-// the bundled seed image for that id (so pre-seeded rows still show the photo).
-const seedImageById = new Map(seedOrganisms.map((o) => [o.id, o.image]));
-function withSeedImages(orgs: Organism[]): Organism[] {
-  return orgs.map((o) => (o.image ? o : { ...o, image: seedImageById.get(o.id) ?? "" }));
+// Seed images/captions act as defaults: if a stored organism has no image (or
+// still has the original placeholder caption), fall back to the bundled seed
+// value for that id — so rows seeded before images were added still show them.
+const seedById = new Map(seedOrganisms.map((o) => [o.id, o]));
+const PLACEHOLDER_CAPTION = "Image citation (APA): Author. (Year). <i>Title</i>. Source. URL";
+function withSeedDefaults(orgs: Organism[]): Organism[] {
+  return orgs.map((o) => {
+    const seed = seedById.get(o.id);
+    if (!seed) return o;
+    const image = o.image ? o.image : seed.image;
+    const caption = !o.caption || o.caption === PLACEHOLDER_CAPTION ? seed.caption : o.caption;
+    return { ...o, image, caption };
+  });
 }
 
 class NoDbError extends Error {
@@ -119,7 +127,7 @@ export async function getSiteData(): Promise<SiteData> {
   ]);
   // Strip any inline formatting so both the public site and the admin editor
   // show clean plain text, regardless of what is stored.
-  return plainifySiteData({ organisms: withSeedImages(organisms), nodes, concepts, references, meta });
+  return plainifySiteData({ organisms: withSeedDefaults(organisms), nodes, concepts, references, meta });
 }
 
 export async function getOrganisms(): Promise<Organism[]> {
