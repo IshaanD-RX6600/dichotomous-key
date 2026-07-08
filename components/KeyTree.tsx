@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { regionMeta, kingdomMeta, findRoot } from "@/lib/display";
 import type { KeyNode, Organism } from "@/lib/types";
@@ -29,6 +29,9 @@ export default function KeyTree({
 
   const [path, setPath] = useState<string[]>([rootId]);
   const [hovered, setHovered] = useState<string | null>(null);
+  const [fit, setFit] = useState(true);
+  const shellRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
 
   /* Layout: each leaf a row, each parent the mean of its children. */
   const { pos, width, height } = useMemo(() => {
@@ -57,6 +60,30 @@ export default function KeyTree({
     return { pos, width, height };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodes, organisms]);
+
+  /* Fit-to-screen: scale the whole diagram down so its full width and height
+     fit the container/viewport, letting the entire tree be seen at once. */
+  useEffect(() => {
+    const el = shellRef.current;
+    if (!el) return;
+    const compute = () => {
+      if (!fit) {
+        setScale(1);
+        return;
+      }
+      const availW = el.clientWidth;
+      const availH = Math.max(340, window.innerHeight * 0.78);
+      setScale(Math.min(1, availW / width, availH / height));
+    };
+    compute();
+    const ro = new ResizeObserver(compute);
+    ro.observe(el);
+    window.addEventListener("resize", compute);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", compute);
+    };
+  }, [fit, width, height]);
 
   const pathTo = (id: string): string[] => {
     const parent: Record<string, string> = {};
@@ -125,6 +152,13 @@ export default function KeyTree({
         >
           ↺ Reset path
         </button>
+        <button
+          onClick={() => setFit((f) => !f)}
+          aria-pressed={fit}
+          className="rounded-md border border-copper/50 bg-copper/10 px-4 py-2 text-sm font-semibold text-copper-soft transition-colors hover:bg-copper/20"
+        >
+          {fit ? "🔍 Actual size" : "⤢ Fit to screen"}
+        </button>
         <p className="text-sm text-cream-dim">
           Click a couplet&rsquo;s <b className="text-copper-soft">a</b>/<b className="text-copper-soft">b</b> choice to light a branch. Hover or focus any node to enlarge it.
         </p>
@@ -164,8 +198,16 @@ export default function KeyTree({
         ))}
       </div>
 
-      <div className="tree-scroll overflow-auto rounded-lg border border-teal-line/60 bg-ink-2/30" style={{ maxHeight: "78vh" }}>
-        <div className="relative" style={{ width, height }}>
+      <div
+        ref={shellRef}
+        className={`tree-scroll rounded-lg border border-teal-line/60 bg-ink-2/30 ${fit ? "overflow-hidden" : "overflow-auto"}`}
+        style={fit ? undefined : { maxHeight: "78vh" }}
+      >
+        <div className="relative mx-auto" style={{ width: fit ? width * scale : width, height: fit ? height * scale : height }}>
+          <div
+            className="absolute left-0 top-0"
+            style={{ width, height, transform: fit ? `scale(${scale})` : undefined, transformOrigin: "top left" }}
+          >
           <svg width={width} height={height} className="absolute inset-0" aria-hidden>
             {edges.map((e) => {
               const x1 = left(e.from) + NODE_W;
@@ -291,10 +333,13 @@ export default function KeyTree({
               </motion.div>
             );
           })}
+          </div>
         </div>
       </div>
       <p className="mt-3 text-center text-xs text-cream-dim">
-        Wide diagram — scroll to pan. On a phone, use the step-through version below.
+        {fit
+          ? "Whole tree shown to scale — switch to Actual size to zoom in, hover, and interact. On a phone, use the step-through version below."
+          : "Wide diagram — scroll to pan. On a phone, use the step-through version below."}
       </p>
     </div>
   );
