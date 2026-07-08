@@ -29,6 +29,13 @@ export const hasDb = !!(
   process.env.POSTGRES_URL_NON_POOLING
 );
 
+// Seed images act as a default: if a stored organism has no image, fall back to
+// the bundled seed image for that id (so pre-seeded rows still show the photo).
+const seedImageById = new Map(seedOrganisms.map((o) => [o.id, o.image]));
+function withSeedImages(orgs: Organism[]): Organism[] {
+  return orgs.map((o) => (o.image ? o : { ...o, image: seedImageById.get(o.id) ?? "" }));
+}
+
 class NoDbError extends Error {
   constructor() {
     super("Database is not configured. Set POSTGRES_URL to enable saving.");
@@ -112,7 +119,7 @@ export async function getSiteData(): Promise<SiteData> {
   ]);
   // Strip any inline formatting so both the public site and the admin editor
   // show clean plain text, regardless of what is stored.
-  return plainifySiteData({ organisms, nodes, concepts, references, meta });
+  return plainifySiteData({ organisms: withSeedImages(organisms), nodes, concepts, references, meta });
 }
 
 export async function getOrganisms(): Promise<Organism[]> {

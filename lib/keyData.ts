@@ -14,7 +14,7 @@ import type {
 /* --- 18 organisms (sort defines gallery order within each kingdom) --- */
 export const seedOrganisms: Organism[] = [
   // Plantae
-  { id: "sphagnum", common: "Sphagnum Moss", binomial: "Sphagnum capillifolium", kingdom: "plantae", grp: "Kingdom Plantae · Bryophyta (mosses)", image: "", alt: "Photograph of Sphagnum Moss (Sphagnum capillifolium)", caption: "Image citation (APA): Author. (Year). <i>Title</i>. Source. URL", sort: 0,
+  { id: "sphagnum", common: "Sphagnum Moss", binomial: "Sphagnum capillifolium", kingdom: "plantae", grp: "Kingdom Plantae · Bryophyta (mosses)", image: "/organisms/sphagnum.png", alt: "Photograph of a dense carpet of Sphagnum Moss (Sphagnum capillifolium)", caption: "Image citation (APA): Author. (Year). <i>Title</i>. Source. URL", sort: 0,
     diagnostic: "A <b>non-vascular</b> plant (bryophyte) with no <b>xylem</b> or <b>phloem</b>; it absorbs water directly and reproduces by <b>spores</b>, forming the <b>peat</b> of Algonquin's bogs.",
     traits: ["<b>Non-vascular</b> (no <b>xylem</b>/<b>phloem</b>)", "<b>Photosynthetic</b>, multicellular", "Absorbs water directly", "Reproduces by <b>spores</b>; builds <b>peat</b>"] },
   { id: "matteuccia", common: "Ostrich Fern", binomial: "Matteuccia struthiopteris", kingdom: "plantae", grp: "Kingdom Plantae · Polypodiopsida (ferns)", image: "", alt: "Photograph of Ostrich Fern (Matteuccia struthiopteris)", caption: "Image citation (APA): Author. (Year). <i>Title</i>. Source. URL", sort: 1,
