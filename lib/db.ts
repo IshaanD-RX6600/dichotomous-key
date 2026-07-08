@@ -21,6 +21,7 @@ import {
   seedReferences,
   seedMeta,
 } from "./keyData";
+import { plainifySiteData } from "./text";
 
 export const hasDb = !!(
   process.env.POSTGRES_URL ||
@@ -93,13 +94,13 @@ async function ensureReady(): Promise<void> {
 /* ---- READS (public) ---- */
 export async function getSiteData(): Promise<SiteData> {
   if (!hasDb) {
-    return {
+    return plainifySiteData({
       organisms: [...seedOrganisms],
       nodes: [...seedNodes],
       concepts: seedConcepts.map((c, i) => ({ id: i + 1, ...c })),
       references: seedReferences.map((r, i) => ({ id: i + 1, ...r })),
       meta: seedMeta,
-    };
+    });
   }
   await ensureReady();
   const [organisms, nodes, concepts, references, meta] = await Promise.all([
@@ -109,7 +110,9 @@ export async function getSiteData(): Promise<SiteData> {
     getReferences(),
     getMeta(),
   ]);
-  return { organisms, nodes, concepts, references, meta };
+  // Strip any inline formatting so both the public site and the admin editor
+  // show clean plain text, regardless of what is stored.
+  return plainifySiteData({ organisms, nodes, concepts, references, meta });
 }
 
 export async function getOrganisms(): Promise<Organism[]> {

@@ -20,7 +20,7 @@ import {
   upsertNode,
   writeMeta,
 } from "@/lib/db";
-import { sanitizeHtml, sanitizePlain } from "@/lib/sanitize";
+import { sanitizePlain } from "@/lib/sanitize";
 import { validateGraph } from "@/lib/display";
 import type { KeyNode, KingdomKey, Organism, RegionKey, SiteMetaData } from "@/lib/types";
 
@@ -82,7 +82,7 @@ export async function POST(
         }
         const kingdom: KingdomKey = KINGDOMS.includes(d.kingdom) ? d.kingdom : "micro";
         const traits = Array.isArray(d.traits)
-          ? d.traits.map((t: unknown) => sanitizeHtml(t)).filter((t: string) => t.length)
+          ? d.traits.map((t: unknown) => sanitizePlain(t)).filter((t: string) => t.length)
           : [];
         const image = sanitizePlain(d.image);
         if (image && !/^https?:\/\//i.test(image)) {
@@ -96,11 +96,11 @@ export async function POST(
           binomial,
           kingdom,
           grp: sanitizePlain(d.grp),
-          diagnostic: sanitizeHtml(d.diagnostic),
+          diagnostic: sanitizePlain(d.diagnostic),
           traits,
           image,
           alt: sanitizePlain(d.alt) || `Photograph of ${sanitizePlain(d.common)} (${binomial})`,
-          caption: sanitizeHtml(d.caption),
+          caption: sanitizePlain(d.caption),
           sort: Number.isFinite(d.sort) ? Number(d.sort) : 999,
         };
         await insertOrganism(organism);
@@ -122,12 +122,12 @@ export async function POST(
           id,
           num: sanitizePlain(d.num) || id,
           region,
-          question: sanitizeHtml(d.question),
+          question: sanitizePlain(d.question),
           short: sanitizePlain(d.short),
-          a_label: sanitizeHtml(d.a_label),
+          a_label: sanitizePlain(d.a_label),
           a_short: sanitizePlain(d.a_short),
           a_target: sanitizePlain(d.a_target),
-          b_label: sanitizeHtml(d.b_label),
+          b_label: sanitizePlain(d.b_label),
           b_short: sanitizePlain(d.b_short),
           b_target: sanitizePlain(d.b_target),
           sort: Number.isFinite(d.sort) ? Number(d.sort) : 999,
@@ -140,12 +140,12 @@ export async function POST(
       case "concepts": {
         if (op === "create") {
           const sort = await nextSort("concepts");
-          const id = await createConcept(sanitizePlain(body.data?.heading) || "New concept", sanitizeHtml(body.data?.body), sort);
+          const id = await createConcept(sanitizePlain(body.data?.heading) || "New concept", sanitizePlain(body.data?.body), sort);
           return ok({ id });
         }
         if (op === "update") {
           if (!body.data?.id) return bad("Missing id.");
-          await updateConcept(Number(body.data.id), sanitizePlain(body.data.heading), sanitizeHtml(body.data.body));
+          await updateConcept(Number(body.data.id), sanitizePlain(body.data.heading), sanitizePlain(body.data.body));
           return ok();
         }
         if (op === "delete") {
@@ -163,12 +163,12 @@ export async function POST(
       case "references": {
         if (op === "create") {
           const sort = await nextSort("references_list");
-          const id = await createReference(sanitizeHtml(body.data?.entry) || "New reference", sort);
+          const id = await createReference(sanitizePlain(body.data?.entry) || "New reference", sort);
           return ok({ id });
         }
         if (op === "update") {
           if (!body.data?.id) return bad("Missing id.");
-          await updateReference(Number(body.data.id), sanitizeHtml(body.data.entry));
+          await updateReference(Number(body.data.id), sanitizePlain(body.data.entry));
           return ok();
         }
         if (op === "delete") {
@@ -193,11 +193,11 @@ export async function POST(
         ];
         for (const k of allowed) {
           if (typeof d[k] === "string") {
-            (patch as any)[k] = htmlKeys.has(k) ? sanitizeHtml(d[k]) : sanitizePlain(d[k]);
+            (patch as any)[k] = htmlKeys.has(k) ? sanitizePlain(d[k]) : sanitizePlain(d[k]);
           }
         }
         if (Array.isArray(d.howTo)) {
-          patch.howTo = d.howTo.map((s: unknown) => sanitizeHtml(s));
+          patch.howTo = d.howTo.map((s: unknown) => sanitizePlain(s));
         }
         await writeMeta(patch);
         return ok();

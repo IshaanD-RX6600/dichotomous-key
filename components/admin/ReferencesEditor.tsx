@@ -94,7 +94,7 @@ export default function ReferencesEditor({ initial }: { initial: RefEntry[] }) {
               className={`${inputCls} min-h-[70px] flex-1`}
               value={row.entry}
               onChange={(e) => update(row._key, { entry: e.target.value })}
-              placeholder="APA reference (HTML italics ok)"
+              placeholder="APA reference"
             />
             <div className="flex shrink-0 flex-col gap-1">
               <button className={btnGhost} onClick={() => move(i, -1)} aria-label="Move up">↑</button>

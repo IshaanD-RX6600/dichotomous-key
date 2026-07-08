@@ -103,9 +103,10 @@ function SpeciesResult({ organism }: { organism: Organism }) {
         <h3 className="mt-1 font-display text-2xl">{organism.common}</h3>
         <p className="italic text-copper-deep">{organism.binomial}</p>
         <p className="mt-1 inline-block rounded bg-black/5 px-2 py-1 text-xs text-bodyink/70">{organism.grp}</p>
-        <div className="mt-3 rounded-md border border-dashed border-copper-deep/40 bg-white/40 p-3">
-          <Rich html={`<b>Why you landed here:</b> ${organism.diagnostic}`} className="text-sm leading-snug" />
-        </div>
+        <p className="mt-3 rounded-md border border-dashed border-copper-deep/40 bg-white/40 p-3 text-sm leading-snug">
+          <span className="font-semibold text-copper-deep">Why you landed here: </span>
+          {organism.diagnostic}
+        </p>
         <ImagePlaceholder organism={organism} className="mt-3 h-28" />
         <p className="mt-2 text-[0.7rem] italic text-bodyink/60">
           <Rich html={organism.caption} />

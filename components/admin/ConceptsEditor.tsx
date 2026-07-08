@@ -87,7 +87,7 @@ export default function ConceptsEditor({ initial }: { initial: Concept[] }) {
             </div>
           </div>
           <div className="mt-3">
-            <label className={labelCls}>Body — HTML ok (bold key terms with &lt;b&gt;)</label>
+            <label className={labelCls}>Body</label>
             <textarea className={`${inputCls} min-h-[140px]`} value={row.body} onChange={(e) => update(row._key, { body: e.target.value })} />
           </div>
           <div className="mt-3 flex items-center gap-2">

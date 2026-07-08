@@ -20,13 +20,14 @@ export default async function Home() {
   } catch {
     // Never hard-crash the public site if the DB is briefly unavailable.
     const { seedOrganisms, seedNodes, seedConcepts, seedReferences } = await import("@/lib/keyData");
-    data = {
+    const { plainifySiteData } = await import("@/lib/text");
+    data = plainifySiteData({
       organisms: seedOrganisms,
       nodes: seedNodes,
       concepts: seedConcepts.map((c, i) => ({ id: i + 1, ...c })),
       references: seedReferences.map((r, i) => ({ id: i + 1, ...r })),
       meta: seedMeta,
-    };
+    });
   }
 
   return (

@@ -109,11 +109,11 @@ export default function OrganismsEditor({ initial }: { initial: Organism[] }) {
               <input className={inputCls} value={row.grp} onChange={(e) => update(row._key, { grp: e.target.value })} />
             </div>
             <div className="md:col-span-2">
-              <label className={labelCls}>Diagnostic (why the key lands here) — HTML ok</label>
+              <label className={labelCls}>Diagnostic (why the key lands here)</label>
               <textarea className={`${inputCls} min-h-[64px]`} value={row.diagnostic} onChange={(e) => update(row._key, { diagnostic: e.target.value })} />
             </div>
             <div className="md:col-span-2">
-              <label className={labelCls}>Key traits (one per line — HTML ok)</label>
+              <label className={labelCls}>Key traits (one per line)</label>
               <textarea
                 className={`${inputCls} min-h-[96px]`}
                 value={row.traits.join("\n")}

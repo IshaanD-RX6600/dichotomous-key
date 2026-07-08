@@ -46,11 +46,11 @@ export default function MetaEditor({ initial }: { initial: SiteMetaData }) {
         {text("Ecozone name", "ecozone", true)}
         {text("Intro heading", "introHeading")}
         {text("How-to heading", "howToHeading")}
-        {text("Intro blurb (HTML ok)", "introBlurb", true)}
-        {text("References note (HTML ok)", "referencesNote", true)}
-        {text("Footer (HTML ok)", "footer", true)}
+        {text("Intro blurb", "introBlurb", true)}
+        {text("References note", "referencesNote", true)}
+        {text("Footer", "footer", true)}
         <div className="md:col-span-2">
-          <label className={labelCls}>&ldquo;How to use&rdquo; steps (one per line, HTML ok)</label>
+          <label className={labelCls}>&ldquo;How to use&rdquo; steps (one per line)</label>
           <textarea
             className={`${inputCls} min-h-[120px]`}
             value={meta.howTo.join("\n")}

@@ -141,7 +141,7 @@ export default function NodesEditor({
               <input className={inputCls} value={row.short} onChange={(e) => update(row._key, { short: e.target.value })} />
             </div>
             <div>
-              <label className={labelCls}>Full question — HTML ok</label>
+              <label className={labelCls}>Full question</label>
               <textarea className={`${inputCls} min-h-[64px]`} value={row.question} onChange={(e) => update(row._key, { question: e.target.value })} />
             </div>
           </div>
@@ -155,7 +155,7 @@ export default function NodesEditor({
                   <input className={inputCls} value={side === "a" ? row.a_short : row.b_short} onChange={(e) => update(row._key, side === "a" ? { a_short: e.target.value } : { b_short: e.target.value })} />
                 </div>
                 <div className="md:col-span-2">
-                  <label className={labelCls}>Full label — HTML ok</label>
+                  <label className={labelCls}>Full label</label>
                   <input className={inputCls} value={side === "a" ? row.a_label : row.b_label} onChange={(e) => update(row._key, side === "a" ? { a_label: e.target.value } : { b_label: e.target.value })} />
                 </div>
                 <div className="md:col-span-3">
