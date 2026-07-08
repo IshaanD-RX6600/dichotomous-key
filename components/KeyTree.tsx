@@ -221,12 +221,15 @@ export default function KeyTree({
         ))}
       </div>
 
-      <div
-        ref={shellRef}
-        className={`tree-scroll ${zoomedIn ? "overflow-auto" : "overflow-visible"}`}
-        style={zoomedIn ? { maxHeight: "80vh" } : undefined}
-      >
-        <div className="relative mx-auto" style={{ width: width * scale, height: height * scale }}>
+      {/* Full-bleed: break out of the text column and use the whole viewport
+          width so the fitted tree renders as large as possible. */}
+      <div className="mx-[calc(50%-50vw)] flex justify-center px-4 md:px-8">
+        <div
+          ref={shellRef}
+          className={`tree-scroll w-full max-w-[1800px] ${zoomedIn ? "overflow-auto" : "overflow-visible"}`}
+          style={zoomedIn ? { maxHeight: "80vh" } : undefined}
+        >
+          <div className="relative mx-auto" style={{ width: width * scale, height: height * scale }}>
           <div
             className="absolute left-0 top-0"
             style={{ width, height, transform: `scale(${scale})`, transformOrigin: "top left" }}
@@ -373,6 +376,7 @@ export default function KeyTree({
               );
             })}
           </div>
+        </div>
         </div>
       </div>
       <p className="mt-3 text-center text-xs text-cream-dim">
