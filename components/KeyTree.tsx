@@ -32,6 +32,8 @@ export default function KeyTree({
 
   const [path, setPath] = useState<string[]>([rootId]);
   const [hovered, setHovered] = useState<string | null>(null);
+  // `pinned` keeps a node enlarged on touch/keyboard, where there is no hover.
+  const [pinned, setPinned] = useState<string | null>(null);
 
   // Fit-to-screen: fitScale sizes the whole tree to the container; zoom is the
   // optional manual multiplier on top (1 = fully fitted, the default).
@@ -221,7 +223,7 @@ export default function KeyTree({
 
       <div
         ref={shellRef}
-        className={`tree-scroll rounded-lg border border-teal-line/60 bg-ink-2/30 ${zoomedIn ? "overflow-auto" : "overflow-visible"}`}
+        className={`tree-scroll ${zoomedIn ? "overflow-auto" : "overflow-visible"}`}
         style={zoomedIn ? { maxHeight: "80vh" } : undefined}
       >
         <div className="relative mx-auto" style={{ width: width * scale, height: height * scale }}>
@@ -236,7 +238,10 @@ export default function KeyTree({
                 const x2 = cx(e.to);
                 const y2 = cy(e.to);
                 const my = (y1 + y2) / 2;
-                const lit = litPairs.has(`${e.from}>${e.to}`) || hovered === e.from || hovered === e.to;
+                const lit =
+                  litPairs.has(`${e.from}>${e.to}`) ||
+                  hovered === e.from || hovered === e.to ||
+                  pinned === e.from || pinned === e.to;
                 return (
                   <path
                     key={`${e.from}>${e.to}`}
@@ -251,7 +256,7 @@ export default function KeyTree({
             </svg>
 
             {allIds.map((id) => {
-              const active = hovered === id;
+              const active = hovered === id || pinned === id;
               const inPath = path.includes(id);
               const leaf = isOrg(id);
               const org = leaf ? orgMap.get(id)! : null;
@@ -275,10 +280,23 @@ export default function KeyTree({
                   }}
                   animate={{ scale: reduced || !active ? 1 : hoverScale }}
                   transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 320, damping: 26 }}
-                  onMouseEnter={() => setHovered(id)}
+                  onMouseEnter={() => {
+                    setHovered(id);
+                    setPinned((p) => (p && p !== id ? null : p));
+                  }}
                   onMouseLeave={() => setHovered((h) => (h === id ? null : h))}
-                  onFocus={() => setHovered(id)}
-                  onBlur={() => setHovered((h) => (h === id ? null : h))}
+                  onPointerDown={(e) => {
+                    if (e.pointerType === "touch") setPinned(id);
+                  }}
+                  onFocus={() => setPinned(id)}
+                  onBlur={(e) => {
+                    // Only collapse when focus leaves the node entirely — moving
+                    // between the header and its a/b buttons (e.g. a tap on a
+                    // touch device) must keep it open so the choice registers.
+                    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+                      setPinned((p) => (p === id ? null : p));
+                    }
+                  }}
                 >
                   <div
                     className={`card-parchment overflow-hidden transition-shadow ${
