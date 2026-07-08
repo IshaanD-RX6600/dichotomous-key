@@ -1,9 +1,15 @@
-import { references, meta } from "@/lib/keyData";
+import type { RefEntry, SiteMetaData } from "@/lib/types";
 import Rich from "./Rich";
 import SectionHeading from "./SectionHeading";
 import Reveal from "./Reveal";
 
-export default function References() {
+export default function References({
+  references,
+  meta,
+}: {
+  references: RefEntry[];
+  meta: SiteMetaData;
+}) {
   return (
     <section id="references" className="scroll-mt-20 py-16">
       <div className="section-shell">
@@ -17,12 +23,9 @@ export default function References() {
           </div>
 
           <ol className="mt-6 space-y-4">
-            {references.map((r, i) => (
-              <li
-                key={i}
-                className="on-dark border-b border-teal-line/50 pb-4 pl-8 -indent-8 text-sm leading-relaxed text-cream"
-              >
-                <Rich html={r} />
+            {references.map((r) => (
+              <li key={r.id} className="on-dark border-b border-teal-line/50 pb-4 pl-8 -indent-8 text-sm leading-relaxed text-cream">
+                <Rich html={r.entry} />
               </li>
             ))}
           </ol>

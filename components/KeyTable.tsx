@@ -1,45 +1,47 @@
-import {
-  questions,
-  questionOrder,
-  species,
-  regionMeta,
-  isSpecies,
-} from "@/lib/keyData";
+import { regionMeta } from "@/lib/display";
+import type { KeyNode, Organism } from "@/lib/types";
 import Rich from "./Rich";
 import SectionHeading from "./SectionHeading";
 import Reveal from "./Reveal";
 
-function targetCell(to: string) {
-  if (isSpecies(to)) {
+export default function KeyTable({
+  nodes,
+  organisms,
+}: {
+  nodes: KeyNode[];
+  organisms: Organism[];
+}) {
+  const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+  const orgMap = new Map(organisms.map((o) => [o.id, o]));
+
+  const targetCell = (to: string) => {
+    const org = orgMap.get(to);
+    if (org) {
+      return (
+        <span>
+          <i className="text-copper-deep">{org.binomial}</i>{" "}
+          <span className="text-bodyink/60">({org.common})</span>
+        </span>
+      );
+    }
+    const n = nodeMap.get(to);
+    return <span className="font-semibold text-copper-deep">→ Couplet {n ? n.num : to || "—"}</span>;
+  };
+
+  const leadsToImages = (n: KeyNode) => {
+    const leaves = [n.a_target, n.b_target].map((t) => orgMap.get(t)).filter(Boolean);
+    if (leaves.length === 0) return <span className="text-bodyink/50">continues</span>;
     return (
-      <span>
-        <i className="text-copper-deep">{species[to].binomial}</i>{" "}
-        <span className="text-bodyink/60">({species[to].common})</span>
+      <span className="flex flex-wrap gap-1">
+        {leaves.map((o) => (
+          <span key={o!.id} className="inline-flex items-center gap-1 rounded border border-dashed border-copper-deep/40 bg-white/40 px-1.5 py-0.5 text-[0.68rem] text-copper-deep">
+            🖼️ {o!.common}
+          </span>
+        ))}
       </span>
     );
-  }
-  return <span className="font-semibold text-copper-deep">→ Couplet {questions[to].num}</span>;
-}
+  };
 
-function leadsToImages(id: string) {
-  const q = questions[id];
-  const leaves = [q.a.to, q.b.to].filter(isSpecies).map((t) => species[t]);
-  if (leaves.length === 0) return <span className="text-bodyink/50">continues</span>;
-  return (
-    <span className="flex flex-wrap gap-1">
-      {leaves.map((s) => (
-        <span
-          key={s.binomial}
-          className="inline-flex items-center gap-1 rounded border border-dashed border-copper-deep/40 bg-white/40 px-1.5 py-0.5 text-[0.68rem] text-copper-deep"
-        >
-          🖼️ {s.common}
-        </span>
-      ))}
-    </span>
-  );
-}
-
-export default function KeyTable() {
   return (
     <section id="table" className="scroll-mt-20 py-16">
       <div className="section-shell">
@@ -63,41 +65,32 @@ export default function KeyTable() {
                 </tr>
               </thead>
               <tbody>
-                {questionOrder.map((id) => {
-                  const q = questions[id];
-                  const color = regionMeta[q.region].color;
+                {nodes.map((n) => {
+                  const color = regionMeta[n.region].color;
                   return (
-                    <tr key={id} className="bg-parchment text-bodyink card-parchment">
-                      <td
-                        className="border-b border-parchment-line p-3 align-top font-display font-bold"
-                        style={{ borderLeft: `6px solid ${color}` }}
-                      >
-                        {q.num}
+                    <tr key={n.id} className="card-parchment bg-parchment text-bodyink">
+                      <td className="border-b border-parchment-line p-3 align-top font-display font-bold" style={{ borderLeft: `6px solid ${color}` }}>
+                        {n.num}
                       </td>
                       <td className="border-b border-parchment-line p-3 align-top">
-                        <span
-                          className="mb-1 inline-block rounded px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-white"
-                          style={{ background: color }}
-                        >
-                          {regionMeta[q.region].name}
+                        <span className="mb-1 inline-block rounded px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-white" style={{ background: color }}>
+                          {regionMeta[n.region].name}
                         </span>
-                        <Rich as="div" html={q.question} />
+                        <Rich as="div" html={n.question} />
                       </td>
                       <td className="border-b border-parchment-line p-3 align-top">
                         <div className="mb-1.5">
                           <span className="mr-1 inline-block rounded bg-copper px-1.5 font-bold text-ink">a</span>
-                          <Rich html={q.a.label} />
-                          <div className="ml-6 mt-0.5">{targetCell(q.a.to)}</div>
+                          <Rich html={n.a_label} />
+                          <div className="ml-6 mt-0.5">{targetCell(n.a_target)}</div>
                         </div>
                         <div>
                           <span className="mr-1 inline-block rounded bg-copper-deep px-1.5 font-bold text-white">b</span>
-                          <Rich html={q.b.label} />
-                          <div className="ml-6 mt-0.5">{targetCell(q.b.to)}</div>
+                          <Rich html={n.b_label} />
+                          <div className="ml-6 mt-0.5">{targetCell(n.b_target)}</div>
                         </div>
                       </td>
-                      <td className="border-b border-parchment-line p-3 align-top">
-                        {leadsToImages(id)}
-                      </td>
+                      <td className="border-b border-parchment-line p-3 align-top">{leadsToImages(n)}</td>
                     </tr>
                   );
                 })}

@@ -1,11 +1,10 @@
-import { meta } from "@/lib/keyData";
+import type { SiteMetaData } from "@/lib/types";
 import Rich from "./Rich";
 
-export default function Hero() {
+export default function Hero({ meta }: { meta: SiteMetaData }) {
   return (
     <section id="home" className="scroll-mt-20">
       <div className="relative overflow-hidden border-b border-teal-line/60">
-        {/* faint specimen-plate grid */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-[0.06]"
@@ -26,26 +25,18 @@ export default function Hero() {
             {meta.ecozone}
           </div>
           <div className="mt-8">
-            <a
-              href="#tree"
-              className="inline-block rounded-md bg-copper px-6 py-3 font-semibold text-ink shadow-plate transition-transform hover:-translate-y-0.5"
-            >
+            <a href="#tree" className="inline-block rounded-md bg-copper px-6 py-3 font-semibold text-ink shadow-plate transition-transform hover:-translate-y-0.5">
               Explore the key tree ↓
             </a>
           </div>
         </div>
       </div>
 
-      {/* intro + how-to */}
       <div className="section-shell grid gap-6 py-14 md:grid-cols-5">
         <div className="md:col-span-3">
           <h2 className="font-display text-2xl text-cream">{meta.introHeading}</h2>
           <hr className="divider-botanical my-4" />
-          <Rich
-            as="p"
-            html={meta.introBlurb}
-            className="on-dark leading-relaxed text-cream-dim"
-          />
+          <Rich as="p" html={meta.introBlurb} className="on-dark leading-relaxed text-cream-dim" />
         </div>
         <div className="md:col-span-2">
           <div className="card-parchment p-6">

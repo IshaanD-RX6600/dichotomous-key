@@ -2,8 +2,15 @@ import KeyTree from "./KeyTree";
 import MobileKeyStepper from "./MobileKeyStepper";
 import SectionHeading from "./SectionHeading";
 import Reveal from "./Reveal";
+import type { KeyNode, Organism } from "@/lib/types";
 
-export default function KeySection() {
+export default function KeySection({
+  nodes,
+  organisms,
+}: {
+  nodes: KeyNode[];
+  organisms: Organism[];
+}) {
   return (
     <section id="tree" className="scroll-mt-20 py-16">
       <div className="section-shell">
@@ -16,13 +23,11 @@ export default function KeySection() {
         </Reveal>
 
         <Reveal delay={0.1}>
-          {/* Desktop / tablet: full SVG tree */}
           <div className="mt-8 hidden md:block">
-            <KeyTree />
+            <KeyTree nodes={nodes} organisms={organisms} />
           </div>
-          {/* Mobile: vertical step-through */}
           <div className="mt-8 md:hidden">
-            <MobileKeyStepper />
+            <MobileKeyStepper nodes={nodes} organisms={organisms} />
           </div>
         </Reveal>
       </div>

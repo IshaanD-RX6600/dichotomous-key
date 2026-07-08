@@ -1,59 +1,75 @@
 # Algonquin Dichotomous Key
 
-An interactive **dichotomous key** identifying **18 organisms** of the Great Lakes–St. Lawrence
+An interactive **dichotomous key** identifying 18 organisms of the Great Lakes–St. Lawrence
 Forest Region (Algonquin Provincial Park), built for a Grade 11 Biology assignment (SBI3U, Ontario).
 
-The centerpiece is a **branching tree diagram** drawn with SVG connectors: click a couplet's
-choices to light up a path in copper, or hover/focus any node to enlarge it and reveal detail.
-A responsive step-through version is provided for phones.
+- **Centerpiece:** the key rendered as an interactive **SVG tree** — hover/focus a node to enlarge
+  and reveal detail, click choices to light up a path, with a breadcrumb and reset. Mobile gets a
+  step-through fallback.
+- **Live, database-backed content:** every public view reads from **Vercel Postgres**, and a
+  password-protected **/admin** panel edits it. Admin saves appear on the public site on the next
+  load — **no redeploy needed** (public pages use `dynamic = "force-dynamic"` and writes call
+  `revalidatePath`).
+- If no database is attached yet, the site gracefully runs from the seed data in `lib/keyData.ts`.
 
 ## Tech stack
 
 - **Next.js 14** (App Router) + **TypeScript**
-- **Tailwind CSS** (custom field-naturalist / specimen-plate theme)
-- **Framer Motion** (tree hover/enlarge, path transitions, scroll reveals — all respect `prefers-reduced-motion`)
-- No database — every question, choice, and species lives in one typed source file: [`lib/keyData.ts`](lib/keyData.ts). The interactive tree, the Full Key Table, and the Species Gallery all render from it.
+- **Tailwind CSS** (field-naturalist / specimen-plate theme; Fraunces + Inter)
+- **Framer Motion** (tree hover/enlarge, transitions; respects `prefers-reduced-motion`)
+- **@vercel/postgres** datastore, seeded from `lib/keyData.ts`
+- **jose** signed-JWT session cookie for admin auth; `middleware.ts` guards `/admin` + `/api/admin/*`
 
-## Sections
+## Data model (Postgres)
 
-- **Home** — title, ecozone, and how to use the key.
-- **The Tree** — the interactive centerpiece (with a mobile step-through fallback).
-- **Full Key Table** — the complete numbered key, colour-coded by branch of life.
-- **Species Gallery** — 18 cards grouped by kingdom.
-- **Biology Concepts** — Taxonomy, Gas Exchange, Transport, Reproduction (key terms bolded).
-- **References** — APA, alphabetical, with in-text citations noted.
+Tables (auto-created + seeded on first DB access): `organisms`, `key_nodes`, `concepts`,
+`references_list`, `site_meta`. `key_nodes.a_target` / `b_target` hold either another node id or an
+organism id — so the tree, the Full Key Table, and the Species Gallery all derive from one source.
+
+## Environment variables
+
+Copy `.env.example` → `.env.local` for local dev, and set the same in Vercel.
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `ADMIN_PASSWORD` | **Yes** (for admin) | The single admin password for `/admin`. |
+| `SESSION_SECRET` | Optional | Signs the session cookie; falls back to `ADMIN_PASSWORD`. |
+| `POSTGRES_URL` (+ friends) | **Yes** (for persistence) | Added automatically when you attach Vercel Postgres. |
 
 ## Run locally
 
 ```bash
 npm install
-npm run dev      # http://localhost:3000
+# put ADMIN_PASSWORD in .env.local; run `vercel env pull` to get POSTGRES_URL
+npm run dev        # http://localhost:3000
 ```
 
-Build / preview a production bundle:
+Without `POSTGRES_URL`, the public site works from seed data and admin saving is disabled.
 
-```bash
-npm run build
-npm start
-```
+## Deploy to Vercel (with the live database + admin)
 
-## Deploy to Vercel
+1. **Deploy the app:** `vercel --prod` (or import the repo at vercel.com/new).
+2. **Attach Postgres:** in the Vercel dashboard → your project → **Storage** → **Create Database**
+   → **Postgres** → connect it to the project. This injects `POSTGRES_URL` automatically. The tables
+   auto-create and seed on the first page load.
+3. **Set the admin password:** project → **Settings → Environment Variables** →
+   add `ADMIN_PASSWORD` (Production). Optionally add `SESSION_SECRET`.
+4. **Redeploy** so the new env vars take effect: `vercel --prod` (or click *Redeploy*).
 
-This is a zero-config Next.js app.
+## Using the admin panel
 
-- **Dashboard:** import the repo at [vercel.com/new](https://vercel.com/new) and click **Deploy**.
-- **CLI:** `npm i -g vercel` then `vercel` (and `vercel --prod` for production).
+Go to `/admin`, sign in with `ADMIN_PASSWORD`, and edit:
 
-## Adding your own photos
+- **Organisms** — full CRUD (common/binomial/kingdom/group/diagnostic/traits/image URL/alt/APA caption).
+- **Key Tree** — each couplet's question, choice labels, and **a/b targets** (dropdown to another
+  node or a species). A live panel flags orphaned nodes, dead-ends, and bad targets.
+- **Concepts**, **References** (with A–Z sort), and **Site Details** (title, ecozone, intro, etc.).
 
-Each species uses a labelled placeholder box. To swap in a real photo:
+Each item has its own **Save** button, a success/error **toast**, and a **"last saved"** time.
+**Reset to seed** restores the original content. Input is validated and sanitized server-side, all
+queries are parameterized, the login route is rate-limited, and only authenticated requests can write.
 
-1. Put the image (e.g. `amanita.jpg`) in a `public/` folder.
-2. In [`components/ImagePlaceholder.tsx`](components/ImagePlaceholder.tsx), replace the placeholder
-   `<div>` with the `<img>` shown in the adjacent `{/* IMAGE: ... */}` comment.
-3. Update the filename and the APA `caption` for that species in `lib/keyData.ts`.
+## Adding photos
 
-## Editing the wording
-
-All text is in `lib/keyData.ts`. Use `<b>…</b>` to bold key terms and `<i>…</i>` for italics
-(e.g. binomial names). Every view updates automatically.
+Paste an image **URL** into an organism's *Image URL* field in `/admin` (with alt text). Blank shows
+a labelled placeholder box.

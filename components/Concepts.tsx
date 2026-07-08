@@ -1,9 +1,9 @@
-import { concepts } from "@/lib/keyData";
+import type { Concept } from "@/lib/types";
 import Rich from "./Rich";
 import SectionHeading from "./SectionHeading";
 import Reveal from "./Reveal";
 
-export default function Concepts() {
+export default function Concepts({ concepts }: { concepts: Concept[] }) {
   return (
     <section id="concepts" className="scroll-mt-20 py-16">
       <div className="section-shell">
@@ -17,7 +17,7 @@ export default function Concepts() {
 
         <div className="mt-8 grid gap-5 md:grid-cols-2">
           {concepts.map((c, i) => (
-            <Reveal key={c.heading} delay={i * 0.06}>
+            <Reveal key={c.id} delay={i * 0.06}>
               <article className="card-parchment h-full p-6">
                 <h3 className="font-display text-xl">{c.heading}</h3>
                 <hr className="my-3 border-parchment-line" />
