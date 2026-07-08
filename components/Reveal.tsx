@@ -1,9 +1,10 @@
-"use client";
-
-import { motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 
-/* Fade-and-rise on scroll into view; disabled under prefers-reduced-motion. */
+/* Fade-and-rise on load. Implemented as a pure-CSS animation (see `.reveal` in
+   globals.css) instead of a JS "animate when scrolled into view" trigger, so
+   the content is ALWAYS visible even if JavaScript never runs or the trigger
+   fails — the fade is a progressive enhancement, never a prerequisite for
+   seeing the content. Honors prefers-reduced-motion via the stylesheet. */
 export default function Reveal({
   children,
   className,
@@ -13,21 +14,12 @@ export default function Reveal({
   className?: string;
   delay?: number;
 }) {
-  const reduced = useReducedMotion();
-
-  if (reduced) {
-    return <div className={className}>{children}</div>;
-  }
-
   return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
+    <div
+      className={`reveal ${className ?? ""}`.trim()}
+      style={delay ? { animationDelay: `${delay}s` } : undefined}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

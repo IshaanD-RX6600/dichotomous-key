@@ -85,6 +85,27 @@
   }
 }
 
+/* Fade-and-rise entrance for sections. Pure CSS so content is visible even if
+   JS never runs; `both` fill keeps the final (visible) state. */
+@keyframes reveal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.reveal {
+  animation: reveal-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    animation: none;
+  }
+}
+
 /* Thin, themed scrollbars for the tree canvas. */
 .tree-scroll::-webkit-scrollbar {
   height: 12px;
