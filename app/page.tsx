@@ -1,5 +1,4 @@
 import Nav from "@/components/Nav";
-import Hero from "@/components/Hero";
 import KeySection from "@/components/KeySection";
 import KeyTable from "@/components/KeyTable";
 import SpeciesGallery from "@/components/SpeciesGallery";
@@ -34,8 +33,6 @@ export default async function Home() {
     <>
       <Nav />
       <main>
-        <Hero meta={data.meta} />
-        <hr className="divider-botanical section-shell" />
         <KeySection nodes={data.nodes} organisms={data.organisms} />
         <hr className="divider-botanical section-shell" />
         <KeyTable nodes={data.nodes} organisms={data.organisms} />

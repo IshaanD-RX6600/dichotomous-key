@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 
 const LINKS = [
-  { id: "home", label: "Home" },
   { id: "tree", label: "The Tree" },
   { id: "table", label: "Key Table" },
   { id: "gallery", label: "Species" },
@@ -12,7 +11,7 @@ const LINKS = [
 ];
 
 export default function Nav() {
-  const [active, setActive] = useState("home");
+  const [active, setActive] = useState("tree");
 
   useEffect(() => {
     const sections = LINKS.map((l) => document.getElementById(l.id)).filter(
@@ -33,7 +32,7 @@ export default function Nav() {
   return (
     <header className="sticky top-0 z-50 border-b border-teal-line/70 bg-ink/85 backdrop-blur-md">
       <nav className="section-shell flex items-center gap-4 py-3">
-        <a href="#home" className="mr-auto flex items-center gap-2 font-display text-cream">
+        <a href="#tree" className="mr-auto flex items-center gap-2 font-display text-cream">
           <span aria-hidden className="text-copper text-lg">
             ❧
           </span>

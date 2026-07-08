@@ -49,11 +49,8 @@ export default function SpeciesGallery({ organisms }: { organisms: Organism[] })
                     >
                       <div style={{ height: 5, background: meta.color }} />
                       <div className="p-4">
-                        <ImagePlaceholder organism={s} className="mb-2 h-36" />
-                        <p className="text-[0.7rem] italic text-bodyink/60">
-                          <Rich html={s.caption} />
-                        </p>
-                        <h4 className="mt-3 font-display text-lg leading-tight">{s.common}</h4>
+                        <ImagePlaceholder organism={s} className="mb-3 h-36" />
+                        <h4 className="font-display text-lg leading-tight">{s.common}</h4>
                         <p className="italic text-copper-deep">{s.binomial}</p>
                         <p className="mt-1 inline-block rounded bg-black/5 px-2 py-0.5 text-[0.7rem] text-bodyink/70">{s.grp}</p>
                         <ul className="mt-3 space-y-1.5">
@@ -64,6 +61,9 @@ export default function SpeciesGallery({ organisms }: { organisms: Organism[] })
                             </li>
                           ))}
                         </ul>
+                        <p className="mt-3 break-words border-t border-parchment-line/70 pt-2 text-[0.7rem] italic text-bodyink/55">
+                          <Rich html={s.caption} />
+                        </p>
                       </div>
                     </motion.article>
                   ))}

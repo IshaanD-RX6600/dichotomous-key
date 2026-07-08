@@ -108,7 +108,7 @@ function SpeciesResult({ organism }: { organism: Organism }) {
           {organism.diagnostic}
         </p>
         <ImagePlaceholder organism={organism} className="mt-3 h-28" />
-        <p className="mt-2 text-[0.7rem] italic text-bodyink/60">
+        <p className="mt-2 break-words text-[0.7rem] italic text-bodyink/60">
           <Rich html={organism.caption} />
         </p>
       </div>

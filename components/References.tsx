@@ -24,7 +24,7 @@ export default function References({
 
           <ol className="mt-6 space-y-4">
             {references.map((r) => (
-              <li key={r.id} className="on-dark border-b border-teal-line/50 pb-4 pl-8 -indent-8 text-sm leading-relaxed text-cream">
+              <li key={r.id} className="on-dark break-words border-b border-teal-line/50 pb-4 pl-8 -indent-8 text-sm leading-relaxed text-cream">
                 <Rich html={r.entry} />
               </li>
             ))}
