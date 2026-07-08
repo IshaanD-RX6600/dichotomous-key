@@ -7,11 +7,14 @@ import type { KeyNode, Organism } from "@/lib/types";
 import Rich from "./Rich";
 import ImagePlaceholder from "./ImagePlaceholder";
 
-const NODE_W = 200;
-const NODE_H = 66;
-const COL_GAP = 258;
-const ROW_GAP = 96;
-const PAD = 48;
+/* Compact, top-to-bottom dendrogram geometry (unscaled diagram units). The
+   whole diagram is then scaled with a single transform so it fits the viewport
+   at once — see the fit-to-screen effect below. */
+const NODE_W = 150; // node box width (also the connector attach width)
+const NODE_H = 46; // compact node box height
+const SLOT_W = 158; // horizontal distance between adjacent leaf columns
+const LEVEL_H = 98; // vertical distance between tree levels
+const PAD = 28; // padding around the diagram so nothing clips at the edges
 
 export default function KeyTree({
   nodes,
@@ -29,51 +32,54 @@ export default function KeyTree({
 
   const [path, setPath] = useState<string[]>([rootId]);
   const [hovered, setHovered] = useState<string | null>(null);
-  const [fit, setFit] = useState(true);
-  const shellRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
 
-  /* Layout: each leaf a row, each parent the mean of its children. */
+  // Fit-to-screen: fitScale sizes the whole tree to the container; zoom is the
+  // optional manual multiplier on top (1 = fully fitted, the default).
+  const shellRef = useRef<HTMLDivElement>(null);
+  const [fitScale, setFitScale] = useState(0.4);
+  const [zoom, setZoom] = useState(1);
+
+  /* Layout: each leaf gets its own column (x); each parent sits at the mean x
+     of its children. Depth drives y, so the root is at the top and the species
+     endpoints are along the bottom — a clean top-down hierarchy. */
   const { pos, width, height } = useMemo(() => {
-    const pos: Record<string, { col: number; row: number }> = {};
+    const pos: Record<string, { x: number; depth: number }> = {};
     let leaf = 0;
+    let maxDepth = 0;
     const seen = new Set<string>();
-    const place = (id: string, col: number): number => {
+    const place = (id: string, depth: number): number => {
+      maxDepth = Math.max(maxDepth, depth);
       if (isOrg(id) || !nodeMap.has(id) || seen.has(id)) {
-        const row = leaf;
+        const x = leaf * SLOT_W;
         leaf += 1;
-        pos[id] = { col, row };
-        return row;
+        pos[id] = { x, depth };
+        return x;
       }
       seen.add(id);
       const q = nodeMap.get(id)!;
-      const ra = place(q.a_target, col + 1);
-      const rb = place(q.b_target, col + 1);
-      const row = (ra + rb) / 2;
-      pos[id] = { col, row };
-      return row;
+      const xa = place(q.a_target, depth + 1);
+      const xb = place(q.b_target, depth + 1);
+      const x = (xa + xb) / 2;
+      pos[id] = { x, depth };
+      return x;
     };
     place(rootId, 0);
-    const cols = Math.max(0, ...Object.values(pos).map((p) => p.col));
-    const width = PAD * 2 + cols * COL_GAP + NODE_W;
-    const height = PAD * 2 + Math.max(0, leaf - 1) * ROW_GAP + NODE_H;
+    const width = PAD * 2 + Math.max(0, leaf - 1) * SLOT_W + NODE_W;
+    const height = PAD * 2 + maxDepth * LEVEL_H + NODE_H;
     return { pos, width, height };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodes, organisms]);
 
-  /* Fit-to-screen: scale the whole diagram down so its full width and height
-     fit the container/viewport, letting the entire tree be seen at once. */
+  /* Recompute the fit scale from the tree's bounding box whenever the container
+     or window changes, so the entire tree is always visible in one view. */
   useEffect(() => {
     const el = shellRef.current;
     if (!el) return;
     const compute = () => {
-      if (!fit) {
-        setScale(1);
-        return;
-      }
-      const availW = el.clientWidth;
-      const availH = Math.max(340, window.innerHeight * 0.78);
-      setScale(Math.min(1, availW / width, availH / height));
+      const availW = el.clientWidth - 8;
+      if (availW <= 0) return; // hidden (e.g. mobile) — keep last value
+      const availH = Math.max(320, Math.min(window.innerHeight * 0.74, 780));
+      setFitScale(Math.min(1, availW / width, availH / height));
     };
     compute();
     const ro = new ResizeObserver(compute);
@@ -83,7 +89,10 @@ export default function KeyTree({
       ro.disconnect();
       window.removeEventListener("resize", compute);
     };
-  }, [fit, width, height]);
+  }, [width, height]);
+
+  const scale = fitScale * zoom;
+  const zoomedIn = zoom > 1.001;
 
   const pathTo = (id: string): string[] => {
     const parent: Record<string, string> = {};
@@ -102,8 +111,9 @@ export default function KeyTree({
     return arr;
   };
 
-  const left = (id: string) => PAD + (pos[id]?.col ?? 0) * COL_GAP;
-  const top = (id: string) => PAD + (pos[id]?.row ?? 0) * ROW_GAP;
+  const left = (id: string) => PAD + (pos[id]?.x ?? 0);
+  const top = (id: string) => PAD + (pos[id]?.depth ?? 0) * LEVEL_H;
+  const cx = (id: string) => left(id) + NODE_W / 2;
   const cy = (id: string) => top(id) + NODE_H / 2;
 
   const edges = useMemo(() => {
@@ -143,6 +153,13 @@ export default function KeyTree({
     (id) => pos[id]
   );
 
+  // How much a hovered/focused node grows: enough to read at the current fit
+  // (≈ actual size), capped so it stays a tidy overlay.
+  const hoverScale = Math.min(2.6, Math.max(1.08, 1 / scale));
+
+  const btnZoom =
+    "flex h-7 w-7 items-center justify-center rounded text-sm font-bold text-cream-dim transition-colors hover:bg-copper/20 hover:text-copper-soft disabled:cursor-not-allowed disabled:opacity-40";
+
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -152,15 +169,19 @@ export default function KeyTree({
         >
           ↺ Reset path
         </button>
-        <button
-          onClick={() => setFit((f) => !f)}
-          aria-pressed={fit}
-          className="rounded-md border border-copper/50 bg-copper/10 px-4 py-2 text-sm font-semibold text-copper-soft transition-colors hover:bg-copper/20"
-        >
-          {fit ? "🔍 Actual size" : "⤢ Fit to screen"}
-        </button>
+        <div className="flex items-center gap-1 rounded-md border border-teal-line/60 bg-ink-2/50 p-1">
+          <button className={btnZoom} onClick={() => setZoom((z) => Math.max(1, +(z - 0.25).toFixed(2)))} disabled={zoom <= 1} aria-label="Zoom out" title="Zoom out">−</button>
+          <button
+            className="rounded px-2 py-1 text-xs font-semibold text-cream-dim transition-colors hover:bg-copper/20 hover:text-copper-soft"
+            onClick={() => setZoom(1)}
+            title="Fit the whole tree to the screen"
+          >
+            {zoomedIn ? "⤢ Fit" : "Fitted"}
+          </button>
+          <button className={btnZoom} onClick={() => setZoom((z) => Math.min(3, +(z + 0.25).toFixed(2)))} disabled={zoom >= 3} aria-label="Zoom in" title="Zoom in">+</button>
+        </div>
         <p className="text-sm text-cream-dim">
-          Click a couplet&rsquo;s <b className="text-copper-soft">a</b>/<b className="text-copper-soft">b</b> choice to light a branch. Hover or focus any node to enlarge it.
+          The whole tree fits the screen. <b className="text-copper-soft">Hover</b> or <b className="text-copper-soft">focus</b> any node to enlarge it and pick its <b className="text-copper-soft">a</b>/<b className="text-copper-soft">b</b> choice.
         </p>
       </div>
 
@@ -200,146 +221,144 @@ export default function KeyTree({
 
       <div
         ref={shellRef}
-        className={`tree-scroll rounded-lg border border-teal-line/60 bg-ink-2/30 ${fit ? "overflow-hidden" : "overflow-auto"}`}
-        style={fit ? undefined : { maxHeight: "78vh" }}
+        className={`tree-scroll rounded-lg border border-teal-line/60 bg-ink-2/30 ${zoomedIn ? "overflow-auto" : "overflow-visible"}`}
+        style={zoomedIn ? { maxHeight: "80vh" } : undefined}
       >
-        <div className="relative mx-auto" style={{ width: fit ? width * scale : width, height: fit ? height * scale : height }}>
+        <div className="relative mx-auto" style={{ width: width * scale, height: height * scale }}>
           <div
             className="absolute left-0 top-0"
-            style={{ width, height, transform: fit ? `scale(${scale})` : undefined, transformOrigin: "top left" }}
+            style={{ width, height, transform: `scale(${scale})`, transformOrigin: "top left" }}
           >
-          <svg width={width} height={height} className="absolute inset-0" aria-hidden>
-            {edges.map((e) => {
-              const x1 = left(e.from) + NODE_W;
-              const y1 = cy(e.from);
-              const x2 = left(e.to);
-              const y2 = cy(e.to);
-              const dx = (x2 - x1) / 2;
-              const lit = litPairs.has(`${e.from}>${e.to}`) || hovered === e.from || hovered === e.to;
+            <svg width={width} height={height} className="absolute inset-0" aria-hidden>
+              {edges.map((e) => {
+                const x1 = cx(e.from);
+                const y1 = cy(e.from);
+                const x2 = cx(e.to);
+                const y2 = cy(e.to);
+                const my = (y1 + y2) / 2;
+                const lit = litPairs.has(`${e.from}>${e.to}`) || hovered === e.from || hovered === e.to;
+                return (
+                  <path
+                    key={`${e.from}>${e.to}`}
+                    d={`M ${x1} ${y1} C ${x1} ${my}, ${x2} ${my}, ${x2} ${y2}`}
+                    fill="none"
+                    stroke={lit ? "#c67b47" : "#2c4a47"}
+                    strokeWidth={lit ? 3 : 1.5}
+                    style={lit ? { filter: "drop-shadow(0 0 4px rgba(198,123,71,.7))" } : undefined}
+                  />
+                );
+              })}
+            </svg>
+
+            {allIds.map((id) => {
+              const active = hovered === id;
+              const inPath = path.includes(id);
+              const leaf = isOrg(id);
+              const org = leaf ? orgMap.get(id)! : null;
+              const node = leaf ? null : nodeMap.get(id)!;
+              const region = leaf ? kingdomMeta[org!.kingdom] : regionMeta[node!.region];
+
+              // Expand a hovered node toward the interior so it stays on-screen.
+              const ox = cx(id) < width * 0.22 ? "left" : cx(id) > width * 0.78 ? "right" : "center";
+              const oy = top(id) < height * 0.25 ? "top" : top(id) > height * 0.7 ? "bottom" : "center";
+
               return (
-                <path
-                  key={`${e.from}>${e.to}`}
-                  d={`M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`}
-                  fill="none"
-                  stroke={lit ? "#c67b47" : "#2c4a47"}
-                  strokeWidth={lit ? 3 : 1.5}
-                  style={lit ? { filter: "drop-shadow(0 0 4px rgba(198,123,71,.7))" } : undefined}
-                />
+                <motion.div
+                  key={id}
+                  className="absolute"
+                  style={{
+                    left: left(id),
+                    top: top(id),
+                    width: NODE_W,
+                    zIndex: active ? 60 : inPath ? 20 : 10,
+                    transformOrigin: `${ox} ${oy}`,
+                  }}
+                  animate={{ scale: reduced || !active ? 1 : hoverScale }}
+                  transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 320, damping: 26 }}
+                  onMouseEnter={() => setHovered(id)}
+                  onMouseLeave={() => setHovered((h) => (h === id ? null : h))}
+                  onFocus={() => setHovered(id)}
+                  onBlur={() => setHovered((h) => (h === id ? null : h))}
+                >
+                  <div
+                    className={`card-parchment overflow-hidden transition-shadow ${
+                      active ? "shadow-glow ring-2 ring-copper" : inPath ? "ring-2 ring-copper/70" : "ring-1 ring-black/10"
+                    }`}
+                    style={{ minHeight: NODE_H }}
+                  >
+                    <div style={{ height: 3, background: region.color }} />
+
+                    {leaf ? (
+                      <button onClick={() => setPath(pathTo(id))} className="block w-full p-2 text-left">
+                        <span className="flex items-center gap-1.5">
+                          <span className="inline-block h-2 w-2 shrink-0 rounded-full" style={{ background: region.color }} />
+                          <span className="font-display text-[0.72rem] font-semibold leading-tight">{org!.common}</span>
+                        </span>
+                        {active && (
+                          <div className="mt-1.5 border-t border-copper-deep/25 pt-1.5">
+                            <p className="text-[0.66rem] italic text-copper-deep">{org!.binomial}</p>
+                            <p className="mt-0.5 text-[0.62rem] font-medium text-bodyink/70">{org!.grp}</p>
+                            <ul className="mt-1 space-y-0.5">
+                              {org!.traits.slice(0, 3).map((t, i) => (
+                                <li key={i} className="flex gap-1 text-[0.64rem] leading-snug">
+                                  <span className="text-copper-deep">•</span>
+                                  <Rich html={t} />
+                                </li>
+                              ))}
+                            </ul>
+                            <ImagePlaceholder organism={org!} className="mt-1.5 h-14 text-[0.55rem]" />
+                          </div>
+                        )}
+                      </button>
+                    ) : (
+                      <div className="p-2">
+                        <button onClick={() => setPath(pathTo(id))} className="block w-full text-left">
+                          <span className="flex items-center gap-1.5">
+                            <span className="flex h-4 min-w-[1.2rem] items-center justify-center rounded px-1 font-display text-[0.62rem] font-bold text-white" style={{ background: region.color }}>
+                              {node!.num}
+                            </span>
+                            <span className="text-[0.66rem] font-semibold leading-tight text-bodyink line-clamp-2">{node!.short}</span>
+                          </span>
+                        </button>
+                        {active && (
+                          <>
+                            <Rich as="p" html={node!.question} className="mt-1.5 block text-[0.66rem] leading-snug text-bodyink/85" />
+                            <div className="mt-1.5 flex flex-col gap-1">
+                              {(["a", "b"] as const).map((k) => {
+                                const target = k === "a" ? node!.a_target : node!.b_target;
+                                const isLit = litPairs.has(`${id}>${target}`);
+                                return (
+                                  <button
+                                    key={k}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      selectChoice(id, k);
+                                    }}
+                                    className={`flex items-start gap-1.5 rounded border px-1.5 py-1 text-left text-[0.64rem] leading-snug transition-colors ${
+                                      isLit
+                                        ? "border-copper bg-copper/20 text-copper-deep"
+                                        : "border-copper-deep/40 bg-white/40 text-bodyink hover:bg-copper/10"
+                                    }`}
+                                  >
+                                    <span className="font-bold uppercase">{k}</span>
+                                    <Rich html={k === "a" ? node!.a_label : node!.b_label} />
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
               );
             })}
-          </svg>
-
-          {allIds.map((id) => {
-            const active = hovered === id;
-            const inPath = path.includes(id);
-            const leaf = isOrg(id);
-            const org = leaf ? orgMap.get(id)! : null;
-            const node = leaf ? null : nodeMap.get(id)!;
-            const region = leaf ? kingdomMeta[org!.kingdom] : regionMeta[node!.region];
-
-            return (
-              <motion.div
-                key={id}
-                className="absolute"
-                style={{
-                  left: left(id),
-                  top: top(id),
-                  width: NODE_W,
-                  zIndex: active ? 50 : inPath ? 20 : 10,
-                  transformOrigin: "left center",
-                }}
-                animate={{ scale: reduced || !active ? 1 : 1.06 }}
-                transition={{ type: "spring", stiffness: 320, damping: 26 }}
-                onMouseEnter={() => setHovered(id)}
-                onMouseLeave={() => setHovered((h) => (h === id ? null : h))}
-                onFocus={() => setHovered(id)}
-                onBlur={() => setHovered((h) => (h === id ? null : h))}
-              >
-                <div
-                  className={`card-parchment overflow-hidden transition-shadow ${
-                    active ? "shadow-glow ring-2 ring-copper" : inPath ? "ring-2 ring-copper/70" : "ring-1 ring-black/10"
-                  }`}
-                >
-                  <div style={{ height: 4, background: region.color }} />
-
-                  {leaf ? (
-                    <button onClick={() => setPath(pathTo(id))} className="block w-full p-3 text-left">
-                      <span className="flex items-center gap-2">
-                        <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: region.color }} />
-                        <span className="font-display text-sm font-semibold leading-tight">{org!.common}</span>
-                      </span>
-                      <span className="mt-0.5 block text-xs italic text-copper-deep">{org!.binomial}</span>
-                      {active && (
-                        <div className="mt-2 border-t border-copper-deep/25 pt-2">
-                          <p className="text-[0.68rem] font-medium text-bodyink/70">{org!.grp}</p>
-                          <ul className="mt-1.5 space-y-1">
-                            {org!.traits.slice(0, 3).map((t, i) => (
-                              <li key={i} className="flex gap-1.5 text-[0.72rem] leading-snug">
-                                <span className="text-copper-deep">•</span>
-                                <Rich html={t} />
-                              </li>
-                            ))}
-                          </ul>
-                          <ImagePlaceholder organism={org!} className="mt-2 h-16 text-[0.6rem]" />
-                        </div>
-                      )}
-                    </button>
-                  ) : (
-                    <div className="p-3">
-                      <button onClick={() => setPath(pathTo(id))} className="block w-full text-left">
-                        <span className="flex items-center gap-2">
-                          <span className="flex h-5 min-w-[1.4rem] items-center justify-center rounded px-1 font-display text-[0.7rem] font-bold text-white" style={{ background: region.color }}>
-                            {node!.num}
-                          </span>
-                          <span className="text-xs font-semibold leading-tight text-bodyink">{node!.short}</span>
-                        </span>
-                      </button>
-                      {active && (
-                        <Rich as="p" html={node!.question} className="card-parchment mt-2 block text-[0.72rem] leading-snug text-bodyink/85" />
-                      )}
-                      <div className="mt-2 flex flex-col gap-1">
-                        {(["a", "b"] as const).map((k) => {
-                          const target = k === "a" ? node!.a_target : node!.b_target;
-                          const isLit = litPairs.has(`${id}>${target}`);
-                          const isNext = frontier === id || isLit;
-                          return (
-                            <button
-                              key={k}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                selectChoice(id, k);
-                              }}
-                              className={`flex items-start gap-1.5 rounded border px-2 py-1 text-left text-[0.7rem] leading-snug transition-colors ${
-                                isLit
-                                  ? "border-copper bg-copper/20 text-copper-deep"
-                                  : isNext
-                                    ? "border-copper-deep/40 bg-white/40 text-bodyink hover:bg-copper/10"
-                                    : "border-black/10 bg-white/25 text-bodyink/80 hover:bg-copper/10"
-                              }`}
-                            >
-                              <span className="font-bold uppercase">{k}</span>
-                              {active ? (
-                                <Rich html={k === "a" ? node!.a_label : node!.b_label} />
-                              ) : (
-                                <span>{k === "a" ? node!.a_short : node!.b_short}</span>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            );
-          })}
           </div>
         </div>
       </div>
       <p className="mt-3 text-center text-xs text-cream-dim">
-        {fit
-          ? "Whole tree shown to scale — switch to Actual size to zoom in, hover, and interact. On a phone, use the step-through version below."
-          : "Wide diagram — scroll to pan. On a phone, use the step-through version below."}
+        The entire top-to-bottom tree is shown at once. Use <b>+ / −</b> to zoom in for a closer look, or <b>Fit</b> to reset. On a phone, use the step-through version below.
       </p>
     </div>
   );
