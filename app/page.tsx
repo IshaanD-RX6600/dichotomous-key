@@ -10,7 +10,7 @@ import { LightboxProvider } from "@/components/Lightbox";
 import { getSiteData } from "@/lib/db";
 import { seedMeta } from "@/lib/keyData";
 
-// Always read fresh from the database so admin edits are live for all visitors.
+// Always read fresh from the database so admin edits are live for all visitors
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
