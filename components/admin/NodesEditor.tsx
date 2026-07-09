@@ -27,7 +27,7 @@ export default function NodesEditor({
 
   const targetOptions = useMemo(
     () => [
-      { value: "", label: "— none —" },
+      { value: "", label: "(none)" },
       ...rows.map((n) => ({ value: n.id, label: `Couplet ${n.num} · ${n.short}` })),
       ...organisms.map((o) => ({ value: o.id, label: `🧬 ${o.common} (${o.binomial})` })),
     ],
@@ -96,7 +96,7 @@ export default function NodesEditor({
         ) : (
           <ul className="mt-2 space-y-1 text-sm text-red-200">
             {issues.map((i, idx) => (
-              <li key={idx}>⚠ <b>{i.kind}</b> — {i.detail}</li>
+              <li key={idx}>⚠ <b>{i.kind}</b>: {i.detail}</li>
             ))}
           </ul>
         )}

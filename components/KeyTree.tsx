@@ -9,7 +9,7 @@ import ImagePlaceholder from "./ImagePlaceholder";
 
 /* Compact, top-to-bottom dendrogram geometry (unscaled diagram units). The
    whole diagram is then scaled with a single transform so it fits the viewport
-   at once — see the fit-to-screen effect below. */
+   at once. See the fit-to-screen effect below. */
 const NODE_W = 150; // node box width (also the connector attach width)
 const NODE_H = 46; // compact node box height
 const SLOT_W = 158; // horizontal distance between adjacent leaf columns
@@ -45,7 +45,7 @@ export default function KeyTree({
 
   /* Layout: each leaf gets its own column (x); each parent sits at the mean x
      of its children. Depth drives y, so the root is at the top and the species
-     endpoints are along the bottom — a clean top-down hierarchy. */
+     endpoints are along the bottom, a clean top-down hierarchy. */
   const { pos, width, height } = useMemo(() => {
     const pos: Record<string, { x: number; depth: number }> = {};
     let leaf = 0;
@@ -81,7 +81,7 @@ export default function KeyTree({
     if (!el) return;
     const compute = () => {
       const availW = el.clientWidth - 8;
-      if (availW <= 0) return; // not laid out yet — keep last value
+      if (availW <= 0) return; // not laid out yet, keep last value
       const availH = Math.max(300, Math.min(window.innerHeight * 0.8, 820));
       const raw = Math.min(availW / width, availH / height); // scale to fully fit
       // Never shrink below a legible minimum; on very small screens the tree
@@ -299,7 +299,7 @@ export default function KeyTree({
                   }}
                   onFocus={() => setPinned(id)}
                   onBlur={(e) => {
-                    // Only collapse when focus leaves the node entirely — moving
+                    // Only collapse when focus leaves the node entirely, moving
                     // between the header and its a/b buttons (e.g. a tap on a
                     // touch device) must keep it open so the choice registers.
                     if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {

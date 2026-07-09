@@ -1,7 +1,7 @@
 /*
   Minimal server-side HTML sanitizer. Content fields allow a small set of
   inline formatting tags (for bolding key terms and italic binomials); every-
-  thing else — scripts, event handlers, other tags — is stripped. Admin writes
+  thing else (scripts, event handlers, other tags) is stripped. Admin writes
   are already behind auth, but we sanitize regardless as defence in depth.
 */
 const ALLOWED = new Set(["b", "strong", "i", "em", "u", "br", "sub", "sup"]);

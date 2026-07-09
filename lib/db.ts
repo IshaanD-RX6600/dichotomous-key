@@ -31,7 +31,7 @@ export const hasDb = !!(
 
 // Seed images/captions act as defaults: if a stored organism has no image (or
 // still has the original placeholder caption), fall back to the bundled seed
-// value for that id — so rows seeded before images were added still show them.
+// value for that id, so rows seeded before images were added still show them.
 const seedById = new Map(seedOrganisms.map((o) => [o.id, o]));
 const PLACEHOLDER_CAPTION = "Image citation (APA): Author. (Year). <i>Title</i>. Source. URL";
 function withSeedDefaults(orgs: Organism[]): Organism[] {

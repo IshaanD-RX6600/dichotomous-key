@@ -21,8 +21,8 @@ import type { SiteData } from "./types";
 /* Strip formatting from every content field (leaves ids/urls/enums intact).
 
    EXCEPTION: the Home and Concepts sections keep their inline formatting so key
-   terms can render bold. Those fields — concept bodies, the intro blurb, and the
-   "how to use" steps — are left as stored HTML and rendered with <RichHtml>
+   terms can render bold. Those fields (concept bodies, the intro blurb, and the
+   "how to use" steps) are left as stored HTML and rendered with <RichHtml>
    (which re-sanitizes). Every other field stays plain text, so the tree, key
    table, species gallery, and reference list are unchanged. */
 export function plainifySiteData(d: SiteData): SiteData {

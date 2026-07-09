@@ -146,7 +146,7 @@ export default function OrganismsEditor({ initial }: { initial: Organism[] }) {
                     />
                   )}
                   <p className="text-[0.7rem] leading-relaxed text-cream-dim">
-                    Live preview. This is the image visitors see — on the site they can
+                    Live preview. This is the image visitors see, and on the site they can
                     <b className="text-copper-soft"> click it to expand</b> to full size.
                     {imgErr[row._key] && (
                       <>
@@ -158,7 +158,7 @@ export default function OrganismsEditor({ initial }: { initial: Organism[] }) {
                 </div>
               ) : (
                 <p className="mt-1 text-[0.7rem] text-cream-dim">
-                  No image set — a labelled placeholder box shows on the site.
+                  No image set, so a labelled placeholder box shows on the site.
                 </p>
               )}
             </div>

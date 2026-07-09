@@ -13,7 +13,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
 /* A single, app-wide "click to expand" overlay. Any image on the site opens it
    through the `useLightbox().open(...)` hook (see ImagePlaceholder), so there is
-   exactly one enlarged view — with backdrop-click and Escape to close — no
+   exactly one enlarged view, with backdrop-click and Escape to close, and no
    matter how many images are on the page. */
 
 export type LightboxImage = {

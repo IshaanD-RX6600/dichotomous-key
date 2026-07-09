@@ -26,7 +26,7 @@ export default function KeyTable({
       );
     }
     const n = nodeMap.get(to);
-    return <span className="font-semibold text-copper-deep">→ Couplet {n ? n.num : to || "—"}</span>;
+    return <span className="font-semibold text-copper-deep">→ Couplet {n ? n.num : to || "?"}</span>;
   };
 
   const leadsToImages = (n: KeyNode) => {

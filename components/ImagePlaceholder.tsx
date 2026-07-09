@@ -67,7 +67,7 @@ export default function ImagePlaceholder({
       <span className="font-display text-sm font-semibold text-bodyink">
         {organism.common}
       </span>
-      <span className="text-[0.7rem] opacity-80">Image slot — add a URL in /admin</span>
+      <span className="text-[0.7rem] opacity-80">Image slot (add a URL in /admin)</span>
     </div>
   );
 }
