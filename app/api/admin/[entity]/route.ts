@@ -20,7 +20,7 @@ import {
   upsertNode,
   writeMeta,
 } from "@/lib/db";
-import { sanitizePlain } from "@/lib/sanitize";
+import { sanitizeHtml, sanitizePlain } from "@/lib/sanitize";
 import { validateGraph } from "@/lib/display";
 import type { KeyNode, KingdomKey, Organism, RegionKey, SiteMetaData } from "@/lib/types";
 
@@ -138,14 +138,16 @@ export async function POST(
 
       /* ------------------------------------------------ concepts */
       case "concepts": {
+        // Bodies keep inline formatting so key terms stay bold in the Concepts
+        // section; headings are plain text.
         if (op === "create") {
           const sort = await nextSort("concepts");
-          const id = await createConcept(sanitizePlain(body.data?.heading) || "New concept", sanitizePlain(body.data?.body), sort);
+          const id = await createConcept(sanitizePlain(body.data?.heading) || "New concept", sanitizeHtml(body.data?.body), sort);
           return ok({ id });
         }
         if (op === "update") {
           if (!body.data?.id) return bad("Missing id.");
-          await updateConcept(Number(body.data.id), sanitizePlain(body.data.heading), sanitizePlain(body.data.body));
+          await updateConcept(Number(body.data.id), sanitizePlain(body.data.heading), sanitizeHtml(body.data.body));
           return ok();
         }
         if (op === "delete") {
@@ -186,18 +188,21 @@ export async function POST(
       case "meta": {
         const d = body.data ?? {};
         const patch: Partial<SiteMetaData> = {};
-        const htmlKeys = new Set(["introBlurb", "referencesNote", "footer"]);
+        // The intro blurb keeps inline formatting so key terms render bold in the
+        // Home section; every other meta field is plain text.
+        const htmlKeys = new Set(["introBlurb"]);
         const allowed: (keyof SiteMetaData)[] = [
           "siteTitle", "subtitle", "ecozone", "introHeading", "introBlurb",
           "howToHeading", "referencesNote", "footer",
         ];
         for (const k of allowed) {
           if (typeof d[k] === "string") {
-            (patch as any)[k] = htmlKeys.has(k) ? sanitizePlain(d[k]) : sanitizePlain(d[k]);
+            (patch as any)[k] = htmlKeys.has(k) ? sanitizeHtml(d[k]) : sanitizePlain(d[k]);
           }
         }
         if (Array.isArray(d.howTo)) {
-          patch.howTo = d.howTo.map((s: unknown) => sanitizePlain(s));
+          // "How to use" steps also render in the Home section with bold terms.
+          patch.howTo = d.howTo.map((s: unknown) => sanitizeHtml(s));
         }
         await writeMeta(patch);
         return ok();

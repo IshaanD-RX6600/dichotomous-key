@@ -58,6 +58,12 @@ export default function MetaEditor({ initial }: { initial: SiteMetaData }) {
           />
         </div>
       </div>
+      <p className="mt-3 text-xs text-cream-dim">
+        The <b>Intro blurb</b> and <b>How to use</b> steps appear in the Home section and keep inline
+        formatting: use <code className="rounded bg-ink px-1">&lt;b&gt;…&lt;/b&gt;</code> to bold key terms and
+        add in-text citations like <code className="rounded bg-ink px-1">(Author, Year)</code>. Other fields are
+        plain text.
+      </p>
       <div className="mt-4 flex items-center gap-3">
         <button className={btnPrimary} disabled={saving} onClick={save}>
           {saving ? "Saving…" : "Save site details"}

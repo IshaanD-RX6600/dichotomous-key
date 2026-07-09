@@ -18,7 +18,13 @@ export function stripHtml(s: string | null | undefined): string {
 
 import type { SiteData } from "./types";
 
-/* Strip formatting from every content field (leaves ids/urls/enums intact). */
+/* Strip formatting from every content field (leaves ids/urls/enums intact).
+
+   EXCEPTION: the Home and Concepts sections keep their inline formatting so key
+   terms can render bold. Those fields — concept bodies, the intro blurb, and the
+   "how to use" steps — are left as stored HTML and rendered with <RichHtml>
+   (which re-sanitizes). Every other field stays plain text, so the tree, key
+   table, species gallery, and reference list are unchanged. */
 export function plainifySiteData(d: SiteData): SiteData {
   return {
     organisms: d.organisms.map((o) => ({
@@ -43,7 +49,7 @@ export function plainifySiteData(d: SiteData): SiteData {
     concepts: d.concepts.map((c) => ({
       ...c,
       heading: stripHtml(c.heading),
-      body: stripHtml(c.body),
+      body: c.body, // rich: key terms rendered bold in the Concepts section
     })),
     references: d.references.map((r) => ({ ...r, entry: stripHtml(r.entry) })),
     meta: {
@@ -52,9 +58,9 @@ export function plainifySiteData(d: SiteData): SiteData {
       subtitle: stripHtml(d.meta.subtitle),
       ecozone: stripHtml(d.meta.ecozone),
       introHeading: stripHtml(d.meta.introHeading),
-      introBlurb: stripHtml(d.meta.introBlurb),
+      introBlurb: d.meta.introBlurb, // rich: rendered in the Home section
       howToHeading: stripHtml(d.meta.howToHeading),
-      howTo: d.meta.howTo.map(stripHtml),
+      howTo: d.meta.howTo, // rich: rendered in the Home section
       referencesNote: stripHtml(d.meta.referencesNote),
       footer: stripHtml(d.meta.footer),
     },

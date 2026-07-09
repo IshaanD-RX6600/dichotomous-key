@@ -72,6 +72,11 @@ export default function ConceptsEditor({ initial }: { initial: Concept[] }) {
         <p className="text-sm text-cream-dim">{rows.length} concept sections</p>
         <button className={btnPrimary} onClick={addRow}>+ Add concept</button>
       </div>
+      <p className="text-xs text-cream-dim">
+        Tip: wrap key terms in <code className="rounded bg-ink px-1">&lt;b&gt;…&lt;/b&gt;</code> to bold them and
+        <code className="mx-1 rounded bg-ink px-1">&lt;i&gt;…&lt;/i&gt;</code> for italic binomials. Add in-text
+        citations like <code className="rounded bg-ink px-1">(Author, Year)</code> that match the References list.
+      </p>
 
       {rows.map((row, i) => (
         <div key={row._key} className={cardCls}>

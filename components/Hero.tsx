@@ -1,5 +1,5 @@
 import type { SiteMetaData } from "@/lib/types";
-import Rich from "./Rich";
+import RichHtml from "./RichHtml";
 
 export default function Hero({ meta }: { meta: SiteMetaData }) {
   return (
@@ -36,7 +36,7 @@ export default function Hero({ meta }: { meta: SiteMetaData }) {
         <div className="md:col-span-3">
           <h2 className="font-display text-2xl text-cream">{meta.introHeading}</h2>
           <hr className="divider-botanical my-4" />
-          <Rich as="p" html={meta.introBlurb} className="on-dark leading-relaxed text-cream-dim" />
+          <RichHtml as="p" html={meta.introBlurb} className="on-dark leading-relaxed text-cream-dim" />
         </div>
         <div className="md:col-span-2">
           <div className="card-parchment p-6">
@@ -47,7 +47,7 @@ export default function Hero({ meta }: { meta: SiteMetaData }) {
                   <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-copper font-display text-sm font-bold text-ink">
                     {i + 1}
                   </span>
-                  <Rich html={step} />
+                  <RichHtml html={step} />
                 </li>
               ))}
             </ol>

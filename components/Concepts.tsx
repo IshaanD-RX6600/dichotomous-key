@@ -1,5 +1,5 @@
 import type { Concept } from "@/lib/types";
-import Rich from "./Rich";
+import RichHtml from "./RichHtml";
 import SectionHeading from "./SectionHeading";
 import Reveal from "./Reveal";
 
@@ -11,7 +11,8 @@ export default function Concepts({ concepts }: { concepts: Concept[] }) {
           <SectionHeading
             eyebrow="The biology behind the key"
             title="Biology concepts"
-            lead="Short write-ups connecting the key to core SBI3U ideas. <b>Key terms</b> are bolded throughout."
+            lead="Short write-ups connecting the key to core SBI3U ideas. <b>Key terms</b> are bolded throughout, with <b>in-text citations</b> to the reference list."
+            richLead
           />
         </Reveal>
 
@@ -21,7 +22,7 @@ export default function Concepts({ concepts }: { concepts: Concept[] }) {
               <article className="card-parchment h-full p-6">
                 <h3 className="font-display text-xl">{c.heading}</h3>
                 <hr className="my-3 border-parchment-line" />
-                <Rich as="p" html={c.body} className="text-sm leading-relaxed" />
+                <RichHtml as="p" html={c.body} className="text-sm leading-relaxed" />
               </article>
             </Reveal>
           ))}
