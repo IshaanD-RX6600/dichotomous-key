@@ -17,7 +17,7 @@ const sans = Inter({
 export const metadata: Metadata = {
   title: "Dichotomous Key · Algonquin Provincial Park",
   description:
-    "An interactive dichotomous key identifying 18 organisms of the Great Lakes–St. Lawrence Forest Region (Algonquin Provincial Park). SBI3U Biology.",
+    "An interactive dichotomous key identifying 20 organisms of the Great Lakes–St. Lawrence Forest Region (Algonquin Provincial Park). SBI3U Biology.",
 };
 
 export default function RootLayout({

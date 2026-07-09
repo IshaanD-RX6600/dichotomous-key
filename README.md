@@ -1,6 +1,6 @@
 # Algonquin Dichotomous Key
 
-An interactive **dichotomous key** identifying 18 organisms of the Great Lakes–St. Lawrence
+An interactive **dichotomous key** identifying 20 organisms of the Great Lakes–St. Lawrence
 Forest Region (Algonquin Provincial Park), built for a Grade 11 Biology assignment (SBI3U, Ontario).
 
 - **Centerpiece:** the key rendered as an interactive **SVG tree** — hover/focus a node to enlarge
