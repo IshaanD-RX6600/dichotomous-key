@@ -15,9 +15,8 @@ export default function Hero({ meta }: { meta: SiteMetaData }) {
           }}
         />
         <div className="section-shell relative py-20 md:py-28">
-          <p className="eyebrow">A field-naturalist dichotomous key</p>
-          <h1 className="mt-3 max-w-4xl font-display text-4xl leading-tight text-cream md:text-6xl">
-            {meta.siteTitle}
+          <h1 className="max-w-4xl font-display text-4xl leading-tight text-cream md:text-6xl">
+            Dichotomous Key
           </h1>
           <p className="mt-4 text-lg text-copper-soft">{meta.subtitle}</p>
           <div className="mt-8">

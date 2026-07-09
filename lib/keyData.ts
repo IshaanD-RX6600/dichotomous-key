@@ -186,7 +186,7 @@ export const seedReferences: { entry: string; sort: number }[] = [
 ];
 
 export const seedMeta: SiteMetaData = {
-  siteTitle: "A Dichotomous Key to 20 Organisms of Algonquin Provincial Park",
+  siteTitle: "Dichotomous Key",
   subtitle: "Great Lakes–St. Lawrence Forest Region · SBI3U Biology (Ontario)",
   ecozone: "Great Lakes–St. Lawrence Forest Region · Algonquin Provincial Park, Ontario",
   introHeading: "A field key to the living things of Algonquin",
