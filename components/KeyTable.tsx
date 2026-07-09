@@ -26,7 +26,7 @@ export default function KeyTable({
       );
     }
     const n = nodeMap.get(to);
-    return <span className="font-semibold text-copper-deep">→ Couplet {n ? n.num : to || "?"}</span>;
+    return <span className="font-semibold text-copper-deep">→ section {n ? n.num : to || "?"}</span>;
   };
 
   const leadsToImages = (n: KeyNode) => {
@@ -56,7 +56,7 @@ export default function KeyTable({
           <SectionHeading
             eyebrow="Static reference"
             title="Full key table"
-            lead="The complete key as a numbered reference. Each <b>couplet</b> offers choice <b>a</b> and choice <b>b</b>; rows are <b>colour-coded</b> by the branch of life they sort."
+            lead="The complete key as a numbered reference. Each <b>section</b> offers choice <b>a</b> and choice <b>b</b>; rows are <b>colour-coded</b> by the branch of life they sort."
           />
         </Reveal>
 
@@ -66,7 +66,7 @@ export default function KeyTable({
               <thead>
                 <tr className="bg-ink-3 text-left font-display text-cream">
                   <th className="p-3">#</th>
-                  <th className="p-3">Question / couplet</th>
+                  <th className="p-3">Question / section</th>
                   <th className="p-3">Direction</th>
                   <th className="p-3">Leads to</th>
                 </tr>
