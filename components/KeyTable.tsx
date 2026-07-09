@@ -1,6 +1,7 @@
 import { regionMeta } from "@/lib/display";
 import type { KeyNode, Organism } from "@/lib/types";
 import Rich from "./Rich";
+import ImagePlaceholder from "./ImagePlaceholder";
 import SectionHeading from "./SectionHeading";
 import Reveal from "./Reveal";
 
@@ -29,16 +30,22 @@ export default function KeyTable({
   };
 
   const leadsToImages = (n: KeyNode) => {
-    const leaves = [n.a_target, n.b_target].map((t) => orgMap.get(t)).filter(Boolean);
+    const leaves = [n.a_target, n.b_target]
+      .map((t) => orgMap.get(t))
+      .filter((o): o is Organism => Boolean(o));
     if (leaves.length === 0) return <span className="text-bodyink/50">continues</span>;
     return (
-      <span className="flex flex-wrap gap-1">
+      <div className="flex flex-wrap gap-3">
         {leaves.map((o) => (
-          <span key={o!.id} className="inline-flex items-center gap-1 rounded border border-dashed border-copper-deep/40 bg-white/40 px-1.5 py-0.5 text-[0.68rem] text-copper-deep">
-            🖼️ {o!.common}
-          </span>
+          <figure key={o.id} className="w-16 sm:w-20">
+            {/* Real photo (click to expand) when a URL is set, else a labelled slot. */}
+            <ImagePlaceholder organism={o} className="h-14 sm:h-16" />
+            <figcaption className="mt-1 text-center text-[0.66rem] font-medium leading-tight text-copper-deep">
+              {o.common}
+            </figcaption>
+          </figure>
         ))}
-      </span>
+      </div>
     );
   };
 
