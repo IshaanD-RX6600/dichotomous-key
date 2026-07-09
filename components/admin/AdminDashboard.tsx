@@ -7,14 +7,12 @@ import { adminPost } from "./adminApi";
 import { btnDanger, btnGhost } from "./ui";
 import OrganismsEditor from "./OrganismsEditor";
 import NodesEditor from "./NodesEditor";
-import ConceptsEditor from "./ConceptsEditor";
 import ReferencesEditor from "./ReferencesEditor";
 import MetaEditor from "./MetaEditor";
 
 const TABS = [
   { id: "organisms", label: "Organisms" },
   { id: "nodes", label: "Key Tree" },
-  { id: "concepts", label: "Concepts" },
   { id: "references", label: "References" },
   { id: "meta", label: "Site Details" },
 ] as const;
@@ -86,7 +84,6 @@ function DashboardInner({ initial, hasDb }: { initial: SiteData; hasDb: boolean 
         <div className="mt-6">
           {tab === "organisms" && <OrganismsEditor initial={initial.organisms} />}
           {tab === "nodes" && <NodesEditor initial={initial.nodes} organisms={initial.organisms} />}
-          {tab === "concepts" && <ConceptsEditor initial={initial.concepts} />}
           {tab === "references" && <ReferencesEditor initial={initial.references} />}
           {tab === "meta" && <MetaEditor initial={initial.meta} />}
         </div>

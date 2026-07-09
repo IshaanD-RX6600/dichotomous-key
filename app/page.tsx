@@ -2,7 +2,6 @@ import Nav from "@/components/Nav";
 import KeySection from "@/components/KeySection";
 import KeyTable from "@/components/KeyTable";
 import SpeciesGallery from "@/components/SpeciesGallery";
-import Concepts from "@/components/Concepts";
 import References from "@/components/References";
 import Rich from "@/components/Rich";
 import { LightboxProvider } from "@/components/Lightbox";
@@ -39,8 +38,6 @@ export default async function Home() {
         <KeyTable nodes={data.nodes} organisms={data.organisms} />
         <hr className="divider-botanical section-shell" />
         <SpeciesGallery organisms={data.organisms} />
-        <hr className="divider-botanical section-shell" />
-        <Concepts concepts={data.concepts} />
         <hr className="divider-botanical section-shell" />
         <References references={data.references} meta={data.meta} />
       </main>

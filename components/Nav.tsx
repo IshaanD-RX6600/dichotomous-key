@@ -6,7 +6,6 @@ const LINKS = [
   { id: "tree", label: "The Tree" },
   { id: "table", label: "Key Table" },
   { id: "gallery", label: "Species" },
-  { id: "concepts", label: "Concepts" },
   { id: "references", label: "References" },
 ];
 
