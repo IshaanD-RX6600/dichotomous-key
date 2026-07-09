@@ -45,7 +45,7 @@ export default async function Home() {
         <hr className="divider-botanical section-shell" />
         <Concepts concepts={data.concepts} />
         <hr className="divider-botanical section-shell" />
-        <References references={data.references} meta={data.meta} />
+        <References references={data.references} organisms={data.organisms} />
       </main>
       <footer className="border-t border-teal-line/60 bg-ink-2/60 py-8">
         <div className="section-shell text-center">

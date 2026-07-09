@@ -20,10 +20,6 @@ export default function Hero({ meta }: { meta: SiteMetaData }) {
             {meta.siteTitle}
           </h1>
           <p className="mt-4 text-lg text-copper-soft">{meta.subtitle}</p>
-          <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-copper/40 bg-copper/10 px-4 py-2 text-sm text-cream">
-            <span aria-hidden>🌲</span>
-            {meta.ecozone}
-          </div>
           <div className="mt-8">
             <a href="#tree" className="inline-block rounded-md bg-copper px-6 py-3 font-semibold text-ink shadow-plate transition-transform hover:-translate-y-0.5">
               Explore the key tree ↓
