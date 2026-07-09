@@ -5,6 +5,7 @@ import SpeciesGallery from "@/components/SpeciesGallery";
 import Concepts from "@/components/Concepts";
 import References from "@/components/References";
 import Rich from "@/components/Rich";
+import { LightboxProvider } from "@/components/Lightbox";
 import { getSiteData } from "@/lib/db";
 import { seedMeta } from "@/lib/keyData";
 
@@ -30,7 +31,7 @@ export default async function Home() {
   }
 
   return (
-    <>
+    <LightboxProvider>
       <Nav />
       <main>
         <KeySection nodes={data.nodes} organisms={data.organisms} />
@@ -51,6 +52,6 @@ export default async function Home() {
           </a>
         </div>
       </footer>
-    </>
+    </LightboxProvider>
   );
 }

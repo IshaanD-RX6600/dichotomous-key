@@ -17,9 +17,16 @@ export default function OrganismsEditor({ initial }: { initial: Organism[] }) {
   const [rows, setRows] = useState<Row[]>(initial.map((o) => ({ ...o, _key: keyOf() })));
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [saved, setSaved] = useState<Record<string, string | null>>({});
+  // Tracks image URLs the browser couldn't load, so the preview can flag them.
+  const [imgErr, setImgErr] = useState<Record<string, boolean>>({});
 
   const update = (key: string, patch: Partial<Row>) =>
     setRows((rs) => rs.map((r) => (r._key === key ? { ...r, ...patch } : r)));
+
+  const setImage = (key: string, url: string) => {
+    update(key, { image: url });
+    setImgErr((m) => ({ ...m, [key]: false })); // give the new URL a fresh chance to load
+  };
 
   const addRow = () =>
     setRows((rs) => [
@@ -120,11 +127,42 @@ export default function OrganismsEditor({ initial }: { initial: Organism[] }) {
                 onChange={(e) => update(row._key, { traits: e.target.value.split("\n") })}
               />
             </div>
-            <div>
+            <div className="md:col-span-2">
               <label className={labelCls}>Image URL (blank = placeholder)</label>
-              <input className={inputCls} value={row.image} onChange={(e) => update(row._key, { image: e.target.value })} placeholder="https://…" />
+              <input className={inputCls} value={row.image} onChange={(e) => setImage(row._key, e.target.value)} placeholder="https://…" />
+              {row.image.trim() ? (
+                <div className="mt-2 flex items-start gap-3 rounded-md border border-teal-line/60 bg-ink p-2">
+                  {imgErr[row._key] ? (
+                    <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded bg-red-500/10 text-center text-[0.65rem] leading-tight text-red-200">
+                      Can’t load URL
+                    </div>
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={row.image}
+                      alt={row.alt || row.common || "preview"}
+                      className="h-20 w-20 shrink-0 rounded object-cover"
+                      onError={() => setImgErr((m) => ({ ...m, [row._key]: true }))}
+                    />
+                  )}
+                  <p className="text-[0.7rem] leading-relaxed text-cream-dim">
+                    Live preview. This is the image visitors see — on the site they can
+                    <b className="text-copper-soft"> click it to expand</b> to full size.
+                    {imgErr[row._key] && (
+                      <>
+                        {" "}
+                        <span className="text-red-200">Check that the URL is public and points directly to an image file.</span>
+                      </>
+                    )}
+                  </p>
+                </div>
+              ) : (
+                <p className="mt-1 text-[0.7rem] text-cream-dim">
+                  No image set — a labelled placeholder box shows on the site.
+                </p>
+              )}
             </div>
-            <div>
+            <div className="md:col-span-2">
               <label className={labelCls}>Image alt text</label>
               <input className={inputCls} value={row.alt} onChange={(e) => update(row._key, { alt: e.target.value })} />
             </div>
