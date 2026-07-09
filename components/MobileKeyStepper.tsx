@@ -107,6 +107,14 @@ function SpeciesResult({ organism }: { organism: Organism }) {
           <span className="font-semibold text-copper-deep">Why you landed here: </span>
           {organism.diagnostic}
         </p>
+        <ul className="mt-3 space-y-1.5">
+          {organism.traits.map((t, i) => (
+            <li key={i} className="flex gap-2 text-sm leading-snug">
+              <span style={{ color: k.color }}>•</span>
+              <Rich html={t} />
+            </li>
+          ))}
+        </ul>
         <ImagePlaceholder organism={organism} className="mt-3 h-28" />
         <p className="mt-2 break-words text-[0.7rem] italic text-bodyink/60">
           <Rich html={organism.caption} />

@@ -53,6 +53,9 @@ export default function SpeciesGallery({ organisms }: { organisms: Organism[] })
                         <h4 className="font-display text-lg leading-tight">{s.common}</h4>
                         <p className="italic text-copper-deep">{s.binomial}</p>
                         <p className="mt-1 inline-block rounded bg-black/5 px-2 py-0.5 text-[0.7rem] text-bodyink/70">{s.grp}</p>
+                        <p className="mt-3 text-[0.82rem] leading-snug text-bodyink/80">
+                          <Rich html={s.diagnostic} />
+                        </p>
                         <ul className="mt-3 space-y-1.5">
                           {s.traits.map((t, i) => (
                             <li key={i} className="flex gap-2 text-sm leading-snug">
