@@ -6,6 +6,7 @@ import SpeciesGallery from "@/components/SpeciesGallery";
 import Concepts from "@/components/Concepts";
 import References from "@/components/References";
 import Rich from "@/components/Rich";
+import Onboarding from "@/components/Onboarding";
 import { LightboxProvider } from "@/components/Lightbox";
 import { getSiteData } from "@/lib/db";
 import { seedMeta } from "@/lib/keyData";
@@ -33,6 +34,7 @@ export default async function Home() {
 
   return (
     <LightboxProvider>
+      <Onboarding />
       <Nav />
       <main>
         <Hero meta={data.meta} />
