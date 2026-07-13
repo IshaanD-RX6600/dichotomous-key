@@ -97,6 +97,8 @@ export async function POST(
           kingdom,
           grp: sanitizePlain(d.grp),
           diagnostic: sanitizePlain(d.diagnostic),
+          habitat: sanitizePlain(d.habitat),
+          morphology: sanitizePlain(d.morphology),
           traits,
           image,
           alt: sanitizePlain(d.alt) || `Photograph of ${sanitizePlain(d.common)} (${binomial})`,

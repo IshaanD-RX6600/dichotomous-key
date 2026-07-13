@@ -40,7 +40,10 @@ function withSeedDefaults(orgs: Organism[]): Organism[] {
     if (!seed) return o;
     const image = o.image ? o.image : seed.image;
     const caption = !o.caption || o.caption === PLACEHOLDER_CAPTION ? seed.caption : o.caption;
-    return { ...o, image, caption };
+    // Rows seeded before habitat/morphology existed fall back to the bundled seed text.
+    const habitat = o.habitat ? o.habitat : seed.habitat;
+    const morphology = o.morphology ? o.morphology : seed.morphology;
+    return { ...o, image, caption, habitat, morphology };
   });
 }
 
@@ -57,10 +60,14 @@ let readyPromise: Promise<void> | null = null;
 async function ensureSchema(): Promise<void> {
   await sql`CREATE TABLE IF NOT EXISTS organisms (
     id text PRIMARY KEY, common text, binomial text, kingdom text, grp text,
-    diagnostic text DEFAULT '', traits jsonb DEFAULT '[]'::jsonb,
+    diagnostic text DEFAULT '', habitat text DEFAULT '', morphology text DEFAULT '',
+    traits jsonb DEFAULT '[]'::jsonb,
     image text DEFAULT '', alt text DEFAULT '',
     caption text DEFAULT '', sort int DEFAULT 0
   )`;
+  // Older tables may predate the habitat/morphology fields; add them if missing.
+  await sql`ALTER TABLE organisms ADD COLUMN IF NOT EXISTS habitat text DEFAULT ''`;
+  await sql`ALTER TABLE organisms ADD COLUMN IF NOT EXISTS morphology text DEFAULT ''`;
   await sql`CREATE TABLE IF NOT EXISTS key_nodes (
     id text PRIMARY KEY, num text, region text, question text, short text,
     a_label text, a_short text, a_target text,
@@ -176,7 +183,8 @@ export async function getMeta(): Promise<SiteMetaData> {
 function rowToOrganism(r: any): Organism {
   return {
     id: r.id, common: r.common, binomial: r.binomial, kingdom: r.kingdom,
-    grp: r.grp, diagnostic: r.diagnostic ?? "", traits: Array.isArray(r.traits) ? r.traits : [],
+    grp: r.grp, diagnostic: r.diagnostic ?? "", habitat: r.habitat ?? "", morphology: r.morphology ?? "",
+    traits: Array.isArray(r.traits) ? r.traits : [],
     image: r.image ?? "", alt: r.alt ?? "", caption: r.caption ?? "", sort: r.sort ?? 0,
   };
 }
@@ -194,12 +202,14 @@ export function assertDb(): void {
 }
 
 export async function insertOrganism(o: Organism): Promise<void> {
-  await sql`INSERT INTO organisms (id, common, binomial, kingdom, grp, diagnostic, traits, image, alt, caption, sort)
+  await sql`INSERT INTO organisms (id, common, binomial, kingdom, grp, diagnostic, habitat, morphology, traits, image, alt, caption, sort)
     VALUES (${o.id}, ${o.common}, ${o.binomial}, ${o.kingdom}, ${o.grp}, ${o.diagnostic},
+            ${o.habitat}, ${o.morphology},
             ${JSON.stringify(o.traits)}::jsonb, ${o.image}, ${o.alt}, ${o.caption}, ${o.sort})
     ON CONFLICT (id) DO UPDATE SET
       common=EXCLUDED.common, binomial=EXCLUDED.binomial, kingdom=EXCLUDED.kingdom,
-      grp=EXCLUDED.grp, diagnostic=EXCLUDED.diagnostic, traits=EXCLUDED.traits, image=EXCLUDED.image,
+      grp=EXCLUDED.grp, diagnostic=EXCLUDED.diagnostic, habitat=EXCLUDED.habitat,
+      morphology=EXCLUDED.morphology, traits=EXCLUDED.traits, image=EXCLUDED.image,
       alt=EXCLUDED.alt, caption=EXCLUDED.caption, sort=EXCLUDED.sort`;
 }
 export async function deleteOrganism(id: string): Promise<void> {

@@ -56,6 +56,16 @@ export default function SpeciesGallery({ organisms }: { organisms: Organism[] })
                         <p className="mt-3 text-[0.82rem] leading-snug text-bodyink/80">
                           <Rich html={s.diagnostic} />
                         </p>
+                        <div className="mt-3 space-y-1 text-[0.82rem] leading-snug text-bodyink/80">
+                          <p>
+                            <span className="font-semibold" style={{ color: meta.color }}>Habitat: </span>
+                            <Rich html={s.habitat} />
+                          </p>
+                          <p>
+                            <span className="font-semibold" style={{ color: meta.color }}>Morphology: </span>
+                            <Rich html={s.morphology} />
+                          </p>
+                        </div>
                         <ul className="mt-3 space-y-1.5">
                           {s.traits.map((t, i) => (
                             <li key={i} className="flex gap-2 text-sm leading-snug">

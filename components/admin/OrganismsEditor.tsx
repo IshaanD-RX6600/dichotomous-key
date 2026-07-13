@@ -32,7 +32,7 @@ export default function OrganismsEditor({ initial }: { initial: Organism[] }) {
     setRows((rs) => [
       {
         _key: keyOf(), _isNew: true, id: "", common: "", binomial: "", kingdom: "micro",
-        grp: "", diagnostic: "", traits: [], image: "", alt: "", caption: "", sort: rs.length + 100,
+        grp: "", diagnostic: "", habitat: "", morphology: "", traits: [], image: "", alt: "", caption: "", sort: rs.length + 100,
       },
       ...rs,
     ]);
@@ -48,7 +48,8 @@ export default function OrganismsEditor({ initial }: { initial: Organism[] }) {
         op: row._isNew ? "create" : "update",
         data: {
           id: row.id, common: row.common, binomial: row.binomial, kingdom: row.kingdom,
-          grp: row.grp, diagnostic: row.diagnostic, traits: row.traits,
+          grp: row.grp, diagnostic: row.diagnostic, habitat: row.habitat, morphology: row.morphology,
+          traits: row.traits,
           image: row.image, alt: row.alt, caption: row.caption, sort: row.sort,
         },
       });
@@ -118,6 +119,14 @@ export default function OrganismsEditor({ initial }: { initial: Organism[] }) {
             <div className="md:col-span-2">
               <label className={labelCls}>Diagnostic (why the key lands here)</label>
               <textarea className={`${inputCls} min-h-[64px]`} value={row.diagnostic} onChange={(e) => update(row._key, { diagnostic: e.target.value })} />
+            </div>
+            <div className="md:col-span-2">
+              <label className={labelCls}>Habitat (where it lives in Algonquin)</label>
+              <textarea className={`${inputCls} min-h-[48px]`} value={row.habitat} onChange={(e) => update(row._key, { habitat: e.target.value })} />
+            </div>
+            <div className="md:col-span-2">
+              <label className={labelCls}>Morphology (body form / structure)</label>
+              <textarea className={`${inputCls} min-h-[48px]`} value={row.morphology} onChange={(e) => update(row._key, { morphology: e.target.value })} />
             </div>
             <div className="md:col-span-2">
               <label className={labelCls}>Key traits (one per line)</label>

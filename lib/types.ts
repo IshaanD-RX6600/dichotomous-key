@@ -10,6 +10,8 @@ export interface Organism {
   kingdom: KingdomKey;
   grp: string; // taxonomic group ("group" is awkward as a column name)
   diagnostic: string; // "why the key lands here" (shown on the result card)
+  habitat: string; // where it lives within Algonquin (labeled field on the card)
+  morphology: string; // its body form / structure (labeled field on the card)
   traits: string[];
   image: string; // image URL ("" → placeholder box is shown)
   alt: string; // descriptive alt text

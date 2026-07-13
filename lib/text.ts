@@ -33,6 +33,8 @@ export function plainifySiteData(d: SiteData): SiteData {
       binomial: stripHtml(o.binomial),
       grp: stripHtml(o.grp),
       diagnostic: stripHtml(o.diagnostic),
+      habitat: stripHtml(o.habitat),
+      morphology: stripHtml(o.morphology),
       traits: o.traits.map(stripHtml),
       alt: stripHtml(o.alt),
       caption: stripHtml(o.caption),
