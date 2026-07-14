@@ -5,6 +5,17 @@ export default function Hero({ meta }: { meta: SiteMetaData }) {
   return (
     <section id="home" className="scroll-mt-20">
       <div className="relative overflow-hidden border-b border-teal-line/60">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/algonquin-hero.png"
+          alt="Aerial view of a lake surrounded by the mixed autumn forest of Algonquin Provincial Park in the Great Lakes–St. Lawrence Forest Region"
+          className="h-48 w-full object-cover md:h-72 lg:h-80"
+        />
+        <span className="pointer-events-none absolute right-2 top-2 rounded bg-ink/60 px-2 py-0.5 text-[0.65rem] text-cream-dim">
+          Algonquin Provincial Park · Photo: authentikcanada.com
+        </span>
+      </div>
+      <div className="relative overflow-hidden border-b border-teal-line/60">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-[0.06]"
